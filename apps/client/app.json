@@ -1,0 +1,68 @@
+{
+  "expo": {
+    "name": "Swoop",
+    "slug": "expo",
+    "scheme": "expo",
+    "version": "2.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/Untitled4.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/Untitled4.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#02182B"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shelbey25.createt3turbo",
+      "buildNumber": "32",
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "https",
+          "http",
+          "snapchat",
+          "bitmoji-sdk",
+          "itms-apps"
+        ],
+        "SCSDKClientId": "7cc3776d-7368-43c5-874d-59860d3bf2c1",
+        "SCSDKRedirectUrl": "https://projectswoop.com",
+        "SCSDKScopes": [
+          "https://auth.snapchat.com/oauth2/api/user.bitmoji.avatar",
+          "https://auth.snapchat.com/oauth2/api/user.display_name"
+        ],
+        "NSPrivacyAccessedAPITypes": {
+          "NSPrivacyAccessedAPICategoryDiskSpace": "The app needs to check available disk space for downloads",
+          "NSPrivacyAccessedAPICategoryFileTimestamp": "The app requires file timestamps to ensure data integrity",
+          "NSPrivacyAccessedAPICategorySystemBootTime": "The app uses system boot time to track uptime for performance monitoring",
+          "NSPrivacyAccessedAPICategoryUserDefaults": "The app uses user defaults to save information locally for convenience and personalization"
+        }
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/Untitled4.png",
+        "backgroundColor": "#02182B"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ce721ac7-2dd7-40e8-a6f4-1089ecc4cb6d"
+      },
+      "router": {
+        "origin": false
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "owner": "shelbey25",
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-secure-store"
+    ]
+  }
+}

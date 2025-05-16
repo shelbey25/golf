@@ -1,0 +1,67 @@
+
+> swoopmanagement@0.1.0 build
+> next build
+
+- info Loaded env from /Users/shelbe/Desktop/swoop/apps/nextjs/.env
+- info Linting and checking validity of types...
+- error ESLint: Failed to load config "@acme/eslint-config" to extend from. Referenced from: /Users/shelbe/Desktop/swoop/.eslintrc.js
+- info Creating an optimized production build...
+- info Compiled successfully
+- info Collecting page data...
+- info Generating static pages (0/18)
+/aboutUs
+/components/support
+/components/bottomBar
+/community
+/admin
+/components/faq
+- info Generating static pages (4/18)
+/faqSwoop
+/components/aboutSwoop
+/
+- info Generating static pages (8/18)
+/components/topBar
+/safety
+/components/swoopMain
+/privacy
+/terms
+- info Generating static pages (13/18)
+/supportSwoop
+/_error
+/_error
+/cookie
+- info Generating static pages (18/18)
+- info Finalizing page optimization...
+
+Route (pages)                              Size     First Load JS
+┌ ○ /                                      282 B           117 kB
+├   /_app                                  0 B             117 kB
+├ ○ /404                                   181 B           117 kB
+├ ○ /aboutUs                               631 B           118 kB
+├ ○ /admin                                 3.71 kB         121 kB
+├ λ /api/trpc/[trpc]                       0 B             117 kB
+├ ○ /community                             3.58 kB         120 kB
+├ ○ /components/aboutSwoop                 192 B           117 kB
+├ ○ /components/bottomBar                  193 B           117 kB
+├ ○ /components/faq                        188 B           117 kB
+├ ○ /components/support                    191 B           117 kB
+├ ○ /components/swoopMain                  192 B           117 kB
+├ ○ /components/topBar                     191 B           117 kB
+├ ○ /cookie                                1.74 kB         119 kB
+├ ○ /faqSwoop                              629 B           118 kB
+├ ○ /privacy                               5.29 kB         122 kB
+├ ○ /safety                                2.29 kB         119 kB
+├ ○ /supportSwoop                          629 B           118 kB
+└ ○ /terms                                 10.9 kB         128 kB
++ First Load JS shared by all              120 kB
+  ├ chunks/framework-19f3649580393c10.js   45.2 kB
+  ├ chunks/main-e123ee48d2e56738.js        27.7 kB
+  ├ chunks/pages/_app-342d97f0335c499c.js  43.1 kB
+  ├ chunks/webpack-ee7e63bc15b31913.js     815 B
+  └ css/96ba611d5e749d90.css               3.34 kB
+
+ƒ Middleware                               164 kB
+
+λ  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+○  (Static)  automatically rendered as static HTML (uses no initial props)
+

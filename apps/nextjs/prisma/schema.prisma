@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Golfer {
+  id        String   @id @default(cuid())
+  name      String   @unique @default("")
+  email     String   @unique @default("")
+  following Golfer[] @relation("Following")
+  followers Golfer[] @relation("Following")
+  rounds    Round[]  @relation("golf_round")
+}
+
+model Round {
+  round_id   String   @id @default(cuid())
+  round_name String   @unique @default("")
+  golfer     Golfer   @relation("golf_round", fields: [golferId], references: [id])
+  golferId   String
+  hits       Hits[]   @relation("round_strokes")
+  hit_data   String
+  hole       GolfHole @relation("round_holes", fields: [holeId], references: [hole_id])
+  holeId     String
+
+  @@index([golferId])
+  @@index([holeId])
+}
+
+model GolfCourse {
+  course_id String     @id @default(cuid())
+  name      String     @unique @default("")
+  holes     GolfHole[] @relation("course_holes")
+}
+
+model GolfHole {
+  hole_id     String     @id @default(cuid())
+  hole_number Int
+  par         Int        @default(0)
+  course      GolfCourse @relation("course_holes", fields: [courseId], references: [course_id])
+  courseId    String
+  rounds      Round[]    @relation("round_holes")
+
+  @@unique([courseId, hole_number])
+  @@index([courseId])
+}
+
+model Hits {
+  id         String @id @default(cuid())
+  stroke     Int
+  latitude   Float
+  longtitude Float
+  round      Round  @relation("round_strokes", fields: [roundId], references: [round_id])
+  roundId    String
+
+  @@index([roundId])
+}
