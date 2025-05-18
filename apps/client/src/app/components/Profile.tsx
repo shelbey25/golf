@@ -24,7 +24,7 @@ const Profile = ({ route, navigation }: {route: any, navigation: any}) => {
 
   const { mode, setMode, club, setClub } = useAppState();
 
-  const courses = [{name: "Highgate Golf Club"}, {name: "Other Golf Club"}, {name: "Misc Golf Club"}]
+  const courses = [{name: "HighGate Golf Club"}, {name: "Other Golf Club"}, {name: "Misc Golf Club"}]
 
 
   return (

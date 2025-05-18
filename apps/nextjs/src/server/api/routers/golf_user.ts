@@ -37,7 +37,9 @@ export const golfUserRouter = createTRPCRouter({
           }
         },
         rounds: {
-          
+          where: {
+            holeId: hole_id
+          }
         }
       }
     });
