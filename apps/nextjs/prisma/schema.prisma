@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["jsonProtocol"]
@@ -24,13 +21,13 @@ model Golfer {
 model Round {
   round_id   String   @id @default(cuid())
   round_name String   @unique @default("")
-  golfer     Golfer   @relation("golf_round", fields: [golferId], references: [id])
   golferId   String
-  hits       Hits[]   @relation("round_strokes")
-  hit_data   String
-  hole       GolfHole @relation("round_holes", fields: [holeId], references: [hole_id])
   holeId     String
+  hit_data   String
   date       DateTime @default(now())
+  golfer     Golfer   @relation("golf_round", fields: [golferId], references: [id])
+  hits       Hits[]   @relation("round_strokes")
+  hole       GolfHole @relation("round_holes", fields: [holeId], references: [hole_id])
 
   @@index([golferId])
   @@index([holeId])
@@ -45,9 +42,9 @@ model GolfCourse {
 model GolfHole {
   hole_id     String     @id @default(cuid())
   hole_number Int
+  courseId    String
   par         Int        @default(0)
   course      GolfCourse @relation("course_holes", fields: [courseId], references: [course_id])
-  courseId    String
   rounds      Round[]    @relation("round_holes")
 
   @@unique([courseId, hole_number])
@@ -59,8 +56,17 @@ model Hits {
   stroke     Int
   latitude   Float
   longtitude Float
-  round      Round  @relation("round_strokes", fields: [roundId], references: [round_id])
   roundId    String
+  round      Round  @relation("round_strokes", fields: [roundId], references: [round_id])
 
   @@index([roundId])
+}
+
+model Following {
+  A String
+  B String
+
+  @@unique([A, B], map: "_Following_AB_unique")
+  @@index([B], map: "_Following_B_index")
+  @@map("_Following")
 }

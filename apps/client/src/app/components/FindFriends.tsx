@@ -1,7 +1,10 @@
-import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
-import { useState } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, Image } from 'react-native';
+import { useEffect, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
+import { api } from '../../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAppState } from './RouteWrap';
 
 const mockProfiles = [
   { id: '1', name: 'Tiger Woods' },
@@ -11,12 +14,26 @@ const mockProfiles = [
 ];
 
 const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
+  const {setPreviewProfile} = useAppState()
     const [search, setSearch] = useState('');
   const [added, setAdded] = useState<string[]>([]);
 
+  const [currentUserId, set_user_id] = useState("")
+  
+  const {data: suggestedUsers } = api.golf_user.getSimilarUsers.useQuery({ currentUserId: currentUserId, search: search})
+
   const filtered = mockProfiles.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  );  
+
+  useEffect(() => {
+    (async () => {
+        const basic_info = await AsyncStorage.getItem('my_basic_info');
+        if (basic_info) {
+          set_user_id(basic_info.split("\\")[0])
+        }
+    })();
+  }, []);
 
   const handleAdd = (id: string) => {
     if (added.includes(id)) {
@@ -52,18 +69,34 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
 
       {/* Profile List */}
       <FlatList
-        data={filtered}
+        data={suggestedUsers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => handleAdd(item.id)}
+          onPress={() => {
+            setPreviewProfile(item)
+            navigation.navigate("Profile Preview")
+          }}
             style={tw`flex-row items-center justify-between bg-slate-200 rounded-xl px-4 py-3 mb-2`}
           >
-            <Text style={tw`text-lg text-gray-800`}>{item.name}</Text>
+            <View style={tw`flex flex-row items-center justify-center gap-x-2`}><View style={tw`h-8 rounded-full border border-white aspect-square`}>
+            <Image
+                source={require("../../../assets/HS.07.19.23.SH.SHC2341.jpeg")}
+                style={tw`w-full h-full rounded-full aspect-square`}
+                resizeMode="cover"
+              />
+        </View>
+            <Text style={tw`text-lg text-gray-800`}>{item.name}</Text></View>
             {added.includes(item.id) ? (
-              <Ionicons name="checkmark-circle" size={24} color="green" />
+              <TouchableOpacity
+              onPress={() => handleAdd(item.id)} style={tw`bg-slate-300 p-2 rounded-lg px-4`}>
+                <Text style={tw`font-semibold text-black`}>Following</Text>
+              </TouchableOpacity>
             ) : (
-              <Ionicons name="add-circle-outline" size={24} color="gray" />
+              <TouchableOpacity
+              onPress={() => handleAdd(item.id)} style={tw`bg-blue-600 p-2 rounded-lg px-4`}>
+                <Text style={tw`font-semibold text-white`}>Follow</Text>
+              </TouchableOpacity>
             )}
           </TouchableOpacity>
         )}
