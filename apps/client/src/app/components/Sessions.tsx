@@ -18,7 +18,7 @@ import * as FileSystem from 'expo-file-system';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-type Session = {
+export type Session = {
   name: string;
   course: string;
   hole: string;
@@ -72,16 +72,16 @@ const Sessions = ({ }: {}) => {
   console.log(allSessionInfo)
 
   return (
-    <View style={tw`h-full flex flex-col justify-between  bg-stone-300 `}>
+    <View style={tw`h-full flex flex-col justify-between  bg-stone-800 `}>
       <FlatList
       data={allSessionInfo}
       renderItem={({ item }) => (
         <>{item ?
         <View style={tw`p-4 justify-center items-center`}>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25 }}>{item.name}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16 }}>{item.course}, {item.hole} {"(Par " + item.par + ")"}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16 }}>{item.hits.length} Strokes</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16 }}>{item.date.toDateString()}</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>{item.name}</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.course}, {item.hole} {"(Par " + item.par + ")"}</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.hits.length} Strokes</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.date.toDateString()}</Text>
             <View style={tw`h-[4]`}></View>
             <MapView
                 mapType="satellite"

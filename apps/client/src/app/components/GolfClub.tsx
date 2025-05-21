@@ -139,7 +139,7 @@ const GolfClub = ({ }: {}) => {
               keyExtractor={item => item.name + item.strokes}
               contentContainerStyle={tw`flex-grow `}
               renderItem={({ item, index }) => (
-                <View style={tw`border-b flex flex-row items-center justify-between p-2 ${item.me ? "bg-yellow-300" : "bg-slate-200"} `} >
+                <View style={tw`border-b flex flex-row items-center justify-between p-2 ${item.me ? "bg-slate-400" : "bg-slate-200"} `} >
                   <View style={tw`flex flex-row gap-x-2`}>
                     <Text style={{ fontFamily: '', fontSize: 30 }}>
                     {index+1 + ". " + item.name}

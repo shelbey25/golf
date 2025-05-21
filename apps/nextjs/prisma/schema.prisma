@@ -30,6 +30,7 @@ model Round {
   hit_data   String
   hole       GolfHole @relation("round_holes", fields: [holeId], references: [hole_id])
   holeId     String
+  date       DateTime @default(now())
 
   @@index([golferId])
   @@index([holeId])

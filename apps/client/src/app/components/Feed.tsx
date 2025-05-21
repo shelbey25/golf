@@ -34,11 +34,13 @@ const Feed = ({ route, navigation }: {route: any, navigation: any}) => {
   
 
   return (
-    <GestureHandlerRootView style={tw`h-full w-full`}>
+    <GestureHandlerRootView style={tw`h-full w-full `}>
       <View style={tw`h-full w-full flex flex-col bg-stone-800 `}>
         <View style={tw`absolute z-10 w-full flex flex-col h-[30] p-12 gap-y-4`}>
           <View style={tw`flex flex-row justify-between w-full`}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => {
+              navigation.navigate("Find Friends")
+            }}>
               <Ionicons name="people" size={24} color="white" />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => {

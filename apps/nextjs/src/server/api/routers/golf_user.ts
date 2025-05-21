@@ -15,6 +15,26 @@ export const golfUserRouter = createTRPCRouter({
 
     });
   }),
+  getMyInfo: publicProcedure.input(
+    z.object({
+      my_id: z.string(),
+    })
+  ).query(({ ctx, input }) => {
+    const {my_id} = input
+    return ctx.prisma.golfer.findFirst({
+      where: {
+        id: my_id,
+      },
+      include: {
+        following: {
+          
+        },
+        followers: {
+          
+        },
+      }
+    });
+  }),
   getAllCompetitors: publicProcedure.input(
     z.object({
       my_id: z.string(),
