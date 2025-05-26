@@ -66,7 +66,7 @@ const SessionPreview = ({ }: {}) => {
             >
                 {item.hits.map((hit, index) => (
                     <Marker key={index} coordinate={{ latitude: hit[0], longitude: hit[1] }}>
-                        <View style={tw`h-2 w-2 ${index == 0 ? "bg-red-500" : index == item.hits.length-1 ? "bg-green-500" : "bg-slate-900"} rounded-full`}></View>
+                        <View style={tw`h-2 w-2 opacity-100 ${index == 0 ? "bg-red-500" : index == item.hits.length-1 ? "bg-green-500" : "bg-slate-900"} rounded-full`}></View>
                     </Marker>
                 ))
                 }

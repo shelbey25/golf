@@ -11,6 +11,7 @@ import MainV2 from "./MainV2";
 import Sessions from "./Sessions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingScreen from "./Loading";
+import CreateAccount from "./AccountCreation";
 
 const MyRouter = () => {
   
@@ -23,7 +24,7 @@ const MyRouter = () => {
         if (basic_info) {
           setMode("Main")
         } else {
-
+          setMode("Account Creation")
         }
             
       
@@ -37,7 +38,9 @@ if (override) {
 
   if (mode === 'INIT') {
     return <LoadingScreen />
-  } if (mode === "Main") {
+  } else if (mode === "Account Creation") {
+    return <CreateAccount />
+} else if (mode === "Main") {
     return (
       <Suspense fallback={null}>
         <MainV2 />
