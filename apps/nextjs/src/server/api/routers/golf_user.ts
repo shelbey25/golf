@@ -89,7 +89,7 @@ export const golfUserRouter = createTRPCRouter({
     ).values());
 
     // If we have 10 or more similar users, return top 10
-    if (uniqueUsers.length >= 10) {
+    if (uniqueUsers.length >= 9) {
       return uniqueUsers.slice(0, 10);
     }
 
@@ -99,7 +99,7 @@ export const golfUserRouter = createTRPCRouter({
         id: { not: currentUserId },
         name: { contains: search ?? "", mode: "insensitive" },
       },
-      take: 10,
+      take: 9,
     });
 
     // Combine and return
@@ -108,7 +108,36 @@ export const golfUserRouter = createTRPCRouter({
       ...extraUsers.filter(extra => !uniqueUsers.find(u => u.id === extra.id))
     ];
  
-    return combined.slice(0, 10);
-  })
+    return combined.slice(0, 9);
+  }),
+  getMyInfoPreview: publicProcedure.input(
+    z.object({
+      my_id: z.string(),
+    })
+  ).query(({ ctx, input }) => {
+    const {my_id} = input
+    return ctx.prisma.golfer.findFirst({
+      where: {
+        id: my_id,
+      },
+      include: {
+        following: {
+          
+        },
+        followers: {
+          
+        },
+        rounds: {
+          include: {
+            hole: {
+              include: {
+                course: {}
+              }
+            }
+          }
+        }
+      }
+    });
+  }),
 
 });

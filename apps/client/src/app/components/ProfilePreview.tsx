@@ -25,23 +25,11 @@ const ProfilePreview = ({ route, navigation }: {route: any, navigation: any}) =>
   
   
 
-  const { mode, setMode, club, setClub, previewProfile, setPreviewProfile } = useAppState();
+  const { mode, setMode, club, setClub, previewProfile, setPreviewProfile, setAllSessionInfoGlobal } = useAppState();
   const [user_id, set_user_id] = useState("")
   const [user_name, set_user_name] = useState("")
 
-  const {data: myInfo} = api.golf_user.getMyInfo.useQuery({my_id: user_id,})
-
-  useEffect(() => {
-    (async () => {
-        const basic_info = await AsyncStorage.getItem('my_basic_info');
-        if (basic_info) {
-          set_user_id(basic_info.split("\\")[0])
-          set_user_name(basic_info.split("\\")[1])
-        }
-            
-      
-    })();
-  }, []);
+  const {data: myInfo} = api.golf_user.getMyInfoPreview.useQuery({my_id: user_id,})
 
 
   const [allSessionInfo, set_AllSessionInfo] = useState<Session[]>([])
@@ -58,23 +46,35 @@ const ProfilePreview = ({ route, navigation }: {route: any, navigation: any}) =>
   }
 
   useEffect(() => {
-    void (async () => {
-      const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(",\\\\") || [];
-      set_AllSessionInfo(all_sessions.map((session) => {
-          if (session === null || session === "") {
-            return null
-          }
-          const indexed_session = session.split(",")
+    setAllSessionInfoGlobal(allSessionInfo)
+  }, [allSessionInfo])
+
+  useEffect(() => {
+    (async () => {
+        if (myInfo) {
+            
+      set_AllSessionInfo(myInfo.rounds.map((round) => {
           return {
-            name: indexed_session[0],
-            course: indexed_session[1],
-            hole: indexed_session[2],
-            par: indexed_session[3],
-            holeId: indexed_session[4],
-            hits: pairCoords(indexed_session.slice(5).map(s => Number(s))),
-            date: new Date(),
+            name: round.round_name,
+            course: round.hole.course.name,
+            hole: "Hole " + round.hole.hole_number.toString(),
+            par: round.hole.par.toString(),
+            holeId: round.hole.hole_id,
+            hits: pairCoords(round.hit_data.split(",").filter(s => s !== "" && s !== null).map(s => Number(s))),
+            date: round.date,
           }
       }).filter((result) => result !== null))
+
+    }
+            
+      
+    })();
+  }, [myInfo]);
+
+  useEffect(() => {
+    void (async () => {
+        set_user_id(previewProfile.id)
+      
     })()
   }, [])  
 
@@ -182,12 +182,12 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
       </View>
       <View style={tw` w-full flex items-center justify-center`}>
       <TouchableOpacity
-        onPress={() => navigation.navigate('Sessions')}
+        onPress={() => navigation.navigate('Sessions Preview')}
         style={tw`w-[95%] flex-row items-center justify-between bg-stone-600 px-6 py-2 rounded-xl shadow-md mb-4`}
         activeOpacity={0.8}
       >
         <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, color: 'white' }}>
-          My Sessions
+          {myInfo?.name.split(" ")[0] ? myInfo?.name.split(" ")[0] + "\'s" : ""} Sessions
         </Text>
         <Icon name="chevron-forward" size={28} color="white" />
       </TouchableOpacity>
@@ -195,7 +195,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
       <View style={tw`pb-4 w-full flex items-center justify-center`}>
       <View style={tw`w-[95%] bg-stone-600 p-2 rounded-lg`}>
         <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>Recent Courses</Text>
-        <FlatList
+        {recentCourses.length > 0 ? <FlatList
             data={recentCourses}
             horizontal={true}
             renderItem={({ item }) => (
@@ -216,7 +216,9 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
             </TouchableOpacity>
             )}
             keyExtractor={item => item.name}
-        />
+        /> : 
+        <Text style={{ fontFamily: '', paddingTop: 4, fontSize: 15, color: "white" }}>No Courses to Display</Text>
+        }
       </View>
       </View>
       <View style={tw`h-[16]`}></View>

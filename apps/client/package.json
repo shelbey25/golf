@@ -19,7 +19,7 @@
     "@expo-google-fonts/sono": "^0.2.3",
     "@expo-google-fonts/truculenta": "^0.2.3",
     "@expo/metro-config": "^0.18.11",
-    "@expo/vector-icons": "^14.0.2",
+    "@expo/vector-icons": "^14.0.3",
     "@next/font": "^13.4.12",
     "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-community/datetimepicker": "8.0.1",

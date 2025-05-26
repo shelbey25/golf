@@ -1,5 +1,5 @@
-import { View, Text, TextInput, FlatList, TouchableOpacity, Image } from 'react-native';
-import { useEffect, useState } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity, Image, Animated } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import tw from 'twrnc';
 import { api } from '../../utils/api';
@@ -17,6 +17,25 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
   const {setPreviewProfile} = useAppState()
     const [search, setSearch] = useState('');
   const [added, setAdded] = useState<string[]>([]);
+
+  const opacity = useRef(new Animated.Value(0.6)).current;
+  
+    useEffect(() => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(opacity, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(opacity, {
+            toValue: 0.5,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }, []);
 
   const [currentUserId, set_user_id] = useState("")
   
@@ -46,7 +65,7 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
   };
 
   return (
-    <View style={tw`flex-1 bg-stone-800 p-4 pt-16`}>
+    <View style={tw`flex-1 bg-stone-800 p-4 pt-16 pb-0`}>
       {/* Header */}
       <View style={tw`flex flex-row w-full justify-between items-center`}>
       <Text style={tw`text-3xl font-bold text-white mb-4`}>Find Friends</Text>
@@ -67,8 +86,7 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
         />
       </View>
 
-      {/* Profile List */}
-      <FlatList
+      {suggestedUsers ? <FlatList
         data={suggestedUsers}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -100,7 +118,27 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
             )}
           </TouchableOpacity>
         )}
-      />
+      /> : 
+      <FlatList
+        data={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+        keyExtractor={(item) => item.toString()}
+        renderItem={({ item }) => (
+          <View
+        
+            style={tw`flex-row items-center justify-between bg-slate-200 rounded-xl px-4 py-3 mb-2`}
+          >
+            <View style={tw`flex flex-row items-center justify-center gap-x-2`}><Animated.View style={[tw`h-8 rounded-full bg-slate-400  aspect-square`, { opacity }]}>
+            
+        </Animated.View>
+        <Animated.View style={[tw`h-8 w-40 rounded-lg bg-slate-400  `, { opacity }]}>
+            
+        </Animated.View>
+         </View>
+         <Animated.View style={[tw`h-8 w-20 rounded-lg bg-blue-500`, { opacity }]}>
+            
+            </Animated.View>
+          </View>
+        )}/>}
     </View>
   )
 }

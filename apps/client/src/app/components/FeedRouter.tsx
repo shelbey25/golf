@@ -8,6 +8,7 @@ import Sessions from './Sessions';
 import GolfClub from './GolfClub';
 import FindFriends from './FindFriends';
 import ProfilePreview from './ProfilePreview';
+import SessionPreview from './SessionPreview';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +21,7 @@ const FeedRouter = () => {
         <Stack.Screen name="Profile Preview" component={ProfilePreview} options={{ headerShown: false, gestureDirection: 'horizontal-inverted', }} />
         <Stack.Screen name="My Profile" component={Profile} options={{ headerShown: false }} />
         <Stack.Screen name="Sessions" component={Sessions} options={{ headerStyle: {  } }} />
+        <Stack.Screen name="Sessions Preview" component={SessionPreview} options={{ headerStyle: {  } }} />
         <Stack.Screen name="Golf Club" component={GolfClub} />
       </Stack.Navigator>
   );
