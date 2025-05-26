@@ -7,6 +7,7 @@ import {
   publicProcedure,
 } from "../trpc";
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 
 export const golfUserRouter = createTRPCRouter({
@@ -14,6 +15,25 @@ export const golfUserRouter = createTRPCRouter({
     return ctx.prisma.golfer.findMany({
 
     });
+  }),
+  createUser: publicProcedure.input(
+    z.object({
+      name: z.string(),
+      email: z.string(),
+      password: z.string(),
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const {name, email, password} = input
+    const hash = await bcrypt.hash(password, 10) as string;
+    const newUser = await ctx.prisma.golfer.create({
+      data: {
+        name: name,
+        email: email,
+        password: hash
+      }
+    })
+
+    return newUser.id + "\\" + newUser.name;
   }),
   getMyInfo: publicProcedure.input(
     z.object({

@@ -13,6 +13,7 @@ model Golfer {
   id        String   @id @default(cuid())
   name      String   @unique @default("")
   email     String   @unique @default("")
+  password  String?   @default(uuid()) //make required later
   following Golfer[] @relation("Following")
   followers Golfer[] @relation("Following")
   rounds    Round[]  @relation("golf_round")
@@ -20,10 +21,10 @@ model Golfer {
 
 model Round {
   round_id   String   @id @default(cuid())
-  round_name String   @unique @default("")
+  round_name String   @default("")
   golferId   String
   holeId     String
-  hit_data   String
+  hit_data   String   @default("")
   date       DateTime @default(now())
   golfer     Golfer   @relation("golf_round", fields: [golferId], references: [id])
   hits       Hits[]   @relation("round_strokes")
