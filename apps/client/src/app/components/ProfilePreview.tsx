@@ -20,6 +20,7 @@ import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Session } from "./Sessions";
+import { Coord, getLongestDistanceInYards } from "./Profile";
 
 const ProfilePreview = ({ route, navigation }: {route: any, navigation: any}) => {
   
@@ -52,8 +53,15 @@ const ProfilePreview = ({ route, navigation }: {route: any, navigation: any}) =>
   useEffect(() => {
     (async () => {
         if (myInfo) {
-            
+            let longestHit = 0;
+
       set_AllSessionInfo(myInfo.rounds.map((round) => {
+        const pairedCoords = pairCoords(round.hit_data.split(",").filter(s => s !== "" && s !== null).map(s => Number(s)))
+
+        const longSessionDist = getLongestDistanceInYards(pairedCoords as Coord[])
+          if (longSessionDist > longestHit) {
+            longestHit = longSessionDist
+          }
           return {
             name: round.round_name,
             course: round.hole.course.name,
@@ -64,6 +72,7 @@ const ProfilePreview = ({ route, navigation }: {route: any, navigation: any}) =>
             date: round.date,
           }
       }).filter((result) => result !== null))
+      setLongestDrive(Math.floor(longestHit))
 
     }
             
@@ -83,6 +92,8 @@ const ProfilePreview = ({ route, navigation }: {route: any, navigation: any}) =>
   const [eagles, setEagles] = useState(0);
   const [birdies, setBirdies] = useState(0);
   const [recentCourses, setRecentCourses] = useState<any[]>([]);
+    const [longestDrive, setLongestDrive] = useState(0);
+  
 
   useEffect(() => {
     let totalStrokes = 0;
@@ -167,7 +178,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Longest Drive</Text>
-              <Text style={tw`text-white text-lg font-bold`}>FIX</Text>
+              <Text style={tw`text-white text-lg font-bold`}>{longestDrive} yds</Text>
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Eagles</Text>

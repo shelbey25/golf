@@ -8,9 +8,9 @@
     "icon": "./assets/Untitled4.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/Untitled4.png",
+      "image": "./assets/SSLOAD.png",
       "resizeMode": "contain",
-      "backgroundColor": "#02182B"
+      "backgroundColor": "#292524"
     },
     "assetBundlePatterns": [
       "**/*"

@@ -21,6 +21,45 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Session } from "./Sessions";
 
+
+export type Coord = [number, number];
+
+// Haversine distance between two lat/lon points in meters
+function haversineDistance([lat1, lon1]: Coord, [lat2, lon2]: Coord): number {
+  const toRad = (x: number) => (x * Math.PI) / 180;
+  const R = 6371000; // Earth's radius in meters
+
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c; // Distance in meters
+}
+
+// Convert meters to yards
+function metersToYards(meters: number): number {
+  return meters * 1.09361;
+}
+
+export function getLongestDistanceInYards(coords: Coord[]): number {
+  let longestDistanceMeters = 0;
+
+  for (let i = 0; i < coords.length - 1; i++) {
+    const dist = haversineDistance(coords[i], coords[i + 1]);
+    if (dist > longestDistanceMeters) {
+      longestDistanceMeters = dist;
+    }
+  }
+
+  return metersToYards(longestDistanceMeters);
+}
+
+
 const Profile = ({ route, navigation }: {route: any, navigation: any}) => {
   
   
@@ -57,24 +96,36 @@ const Profile = ({ route, navigation }: {route: any, navigation: any}) => {
     return paired;
   }
 
+  const [longestDrive, setLongestDrive] = useState(0);
+
   useEffect(() => {
     void (async () => {
       const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(",\\\\") || [];
+      let longestHit = 0;
       set_AllSessionInfo(all_sessions.map((session) => {
           if (session === null || session === "") {
             return null
           }
           const indexed_session = session.split(",")
+          const pairedCoords = pairCoords(indexed_session.slice(5).map(s => Number(s)));
+          
+          const longSessionDist = getLongestDistanceInYards(pairedCoords as Coord[])
+          if (longSessionDist > longestHit) {
+            longestHit = longSessionDist
+          }
+          
           return {
             name: indexed_session[0],
             course: indexed_session[1],
             hole: indexed_session[2],
             par: indexed_session[3],
             holeId: indexed_session[4],
-            hits: pairCoords(indexed_session.slice(5).map(s => Number(s))),
-            date: new Date(),
+            hits: pairedCoords,
+            date: new Date(), //this is broken
           }
+
       }).filter((result) => result !== null))
+      setLongestDrive(longestHit)
     })()
   }, [])  
 
@@ -167,7 +218,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Longest Drive</Text>
-              <Text style={tw`text-white text-lg font-bold`}>FIX</Text>
+              <Text style={tw`text-white text-lg font-bold`}>{longestDrive} yds</Text>
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Eagles</Text>
