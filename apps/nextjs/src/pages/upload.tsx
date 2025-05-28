@@ -17,7 +17,7 @@ export default function Page() {
     setUploading(true)
 
     const response = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + '/api/upload',
+      process.env.NEXT_PUBLIC_BASE_URL || "" + '/api/upload',
       {
         method: 'POST',
         headers: {
@@ -26,8 +26,6 @@ export default function Page() {
         body: JSON.stringify({ filename: file.name, contentType: file.type }),
       }
     )
-
-    console.log(response)
 
     if (response.ok) {
       const { url, fields } = await response.json()
@@ -38,14 +36,10 @@ export default function Page() {
       })
       formData.append('file', file)
 
-      console.log("A")
-
       const uploadResponse = await fetch(url, {
         method: 'POST',
         body: formData,
       })
-
-      console.log(uploadResponse)
 
       if (uploadResponse.ok) {
         alert('Upload successful!')

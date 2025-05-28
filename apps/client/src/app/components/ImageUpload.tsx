@@ -1,78 +1,75 @@
-import * as ImagePicker from 'expo-image-picker';
-import { Button, Image, View, Text } from 'react-native';
 import { useState } from 'react';
-import AWS from 'aws-sdk'
-import { v4 as uuidv4 } from 'uuid'
-import path from 'path'
-import { api } from '../../utils/api';
+import { View, Button, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 
+export default function UploadScreen() {
+  const [uploading, setUploading] = useState(false);
 
-export default function UploadImageScreen() {
-  const [image, setImage] = useState<string | null>(null);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const uploadToS3 = async (file: { uri: string; name: string; type: string }) => {
+    setUploading(true);
+    
+    try {
+      // 1. Get presigned URL from Next.js
+      const presignRes = await fetch('http://localhost:3000/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type,
+        }),
+      });
 
+      const { url, fields } = await presignRes.json();
 
+      // 2. Prepare form data
+      const formData = new FormData();
+      Object.entries(fields).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      formData.append('file', {
+        uri: file.uri,
+        name: file.name,
+        type: file.type,
+      } as any);
 
-  const uploadFile = async (fileUri: string, fileName: string, mimeType: string) => {
-    const formData = new FormData();
-formData.append('file', {
-  uri: fileUri,
-  name: fileName,
-  type: mimeType || 'application/octet-stream',
-} as any);
+      // 3. Upload to S3
+      const uploadRes = await fetch(url, {
+        method: 'POST',
+        body: formData,
+      });
 
-const response = await fetch('http://localhost:3000/api/upload', {
-  method: 'POST',
-  body: formData,
+      if (!uploadRes.ok) throw new Error('Upload failed');
+      Alert.alert('Success!', 'Image uploaded to S3');
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setUploading(false);
+    }
+  };
 
-});
-
-
-    console.log(response)
-  
-    if (!response.ok) throw new Error('Upload failed' + response.statusText)
-  
-
-
-    const data = await response.json()
-
-    return data.url // S3 file URL
-  }
-
-  const pickImageNewTwo = async () => {
+  const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 1,
-      base64: false,
+      quality: 0.8,
     });
 
-    console.log("C")
     if (!result.canceled) {
-      const asset = result.assets[0];
-      console.log("B")
-      setImage(asset.uri);
-
-      console.log("A")
-      try {
-      const fileBlob = await fetch(asset.uri).then(r => r.blob());
-
-      if (asset && asset.fileName) {
-      console.log("AT")
-      await uploadFile(asset.uri, asset.fileName, asset.mimeType || "")
-      console.log("UPLOADED")
-      }
-      } catch (error) {
-        console.log("UPLOAD: "+ error)
-      }
-
+      const file = {
+        uri: result.assets[0].uri,
+        name: result.assets[0].fileName || `image-${Date.now()}.jpg`,
+        type: 'image/jpeg',
+      };
+      await uploadToS3(file);
     }
   };
 
   return (
-    <View style={{ marginTop: 50 }}>
-      <Button title="Pick and upload image" onPress={pickImageNewTwo} />
-      {image && <Image source={{ uri: image }} style={{ width: 200, height: 200 }} />}
-      {fileUrl && <Text>Uploaded to: {fileUrl}</Text>}
+    <View style={{ flex: 1, justifyContent: 'center' }}>
+      <Button
+        title="Pick and Upload"
+        onPress={pickImage}
+        disabled={uploading}
+      />
     </View>
   );
 }

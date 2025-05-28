@@ -25,6 +25,6 @@
     "**/*.tsx",
     "**/*.cjs",
     "**/*.mjs"
-  ],
+, "src/pages/api/upload/s3-upload.js"  ],
   "exclude": ["node_modules"]
 }
