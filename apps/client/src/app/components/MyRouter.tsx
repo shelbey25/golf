@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingScreen from "./Loading";
 import CreateAccount from "./AccountCreation";
 import UploadImageScreen from "./ImageUpload";
+import ImageCall from "./ImageCall";
 
 const MyRouter = () => {
   
@@ -32,9 +33,9 @@ const MyRouter = () => {
     })();
   }, []);
   
-const override = true
+const override = false
 if (override) {
-  return <UploadImageScreen />
+  return <ImageCall />
 }
 
   if (mode === 'INIT') {

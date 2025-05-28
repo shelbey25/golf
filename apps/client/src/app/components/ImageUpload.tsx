@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Button, Alert } from 'react-native';
+import { View, Button, Alert, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function UploadScreen() {
@@ -62,6 +62,7 @@ export default function UploadScreen() {
       await uploadToS3(file);
     }
   };
+
 
   return (
     <View style={{ flex: 1, justifyContent: 'center' }}>

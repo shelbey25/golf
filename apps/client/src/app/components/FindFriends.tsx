@@ -5,13 +5,8 @@ import tw from 'twrnc';
 import { api } from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppState } from './RouteWrap';
+import useS3PresignedUrl from '../hooks/useS3PresignedUrl';
 
-const mockProfiles = [
-  { id: '1', name: 'Tiger Woods' },
-  { id: '2', name: 'Rory McIlroy' },
-  { id: '3', name: 'Shelbe Johnson' },
-  { id: '4', name: 'Nelly Korda' },
-];
 
 const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
   const {setPreviewProfile} = useAppState()
@@ -41,9 +36,6 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
   
   const {data: suggestedUsers } = api.golf_user.getSimilarUsers.useQuery({ currentUserId: currentUserId, search: search})
 
-  const filtered = mockProfiles.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );  
 
   useEffect(() => {
     (async () => {
@@ -63,6 +55,18 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
         setAdded([...added, id]);
       }
   };
+
+  const { url, loading, error, getPresignedUrl } = useS3PresignedUrl();
+  const [urls, setUrls] = useState<string[]>([])
+
+  useEffect(() => {
+    void (async () => {
+      setUrls(suggestedUsers?.map(async (user) => {
+        await getPresignedUrl(user.profilePhotoID);
+        return url || "";
+    }) || [])
+    })()
+  }, [suggestedUsers])
 
   return (
     <View style={tw`flex-1 bg-stone-800 p-4 pt-16 pb-0`}>
@@ -89,7 +93,7 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
       {suggestedUsers ? <FlatList
         data={suggestedUsers}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <TouchableOpacity
           onPress={() => {
             setPreviewProfile(item)
