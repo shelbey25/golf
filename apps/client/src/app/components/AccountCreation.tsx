@@ -14,6 +14,7 @@ export default function CreateAccount() {
     onSuccess: async (result) => {
       await AsyncStorage.setItem('my_basic_info', result);
       const my_info = await AsyncStorage.getItem('my_basic_info')
+      console.log(my_info)
       setMode("Main")
     }
   })

@@ -6,12 +6,34 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import * as Location from 'expo-location';
 import { api } from "../../utils/api";
 import CourseSelector from "./CourseSelector";
+import HitLogger from "./HitLogger";
 
 
 const Hit = ({ }) => {
 
     const createRound = api.golf_session.createRound.useMutation();
     const {data: allCourses} = api.courses.getAll.useQuery();
+
+    const [sessionCount, setSessionCount] = useState(0)
+    const [my_id, set_my_id] = useState("")
+
+    const updateMySessionInfo = async () => {
+        const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(",\\\\") || [];
+        setSessionCount(all_sessions.length)
+    }
+
+    useEffect(() => {
+        
+        void (async () => {
+            updateMySessionInfo()
+            const my_info = await AsyncStorage.getItem('my_basic_info')
+            set_my_id(my_info ? my_info.split("\\")[0] : "")
+            
+        })()
+    }, [])
+
+    
+    
 
     const [currentRoundInfo, setCurrentRoundInfo] = useState("Session 1,Highgate Golf Club,Hole 1,5,")
 
@@ -67,14 +89,50 @@ const Hit = ({ }) => {
             setSessionStrokes(session_strokes || "")
         })()
     }, [])
+
+    const onStroke = () => {
+        void (async () => {
+            await AsyncStorage.setItem('stroke_count', (parseInt(strokeCount)+1).toString());
+            setStrokeCount((parseInt(strokeCount)+1).toString())
+
+            const location = await Location.getCurrentPositionAsync({});
+            const new_coord_set = location?.coords.latitude + "," + location?.coords.longitude + ","
+            setSessionStrokes(sessionStrokes + new_coord_set);
+            AsyncStorage.setItem('session_strokes', sessionStrokes + new_coord_set);
+        })()
+    }
+
+    const onFinish = () => {
+        setActiveSession("false");
+        AsyncStorage.setItem('active_session', 'false');
+        void (async () => {
+            const session_strokes = await AsyncStorage.getItem('session_strokes');
+            await createRound.mutateAsync({
+                round_name: currentRoundInfo.split(",")[0],
+                hit_data: session_strokes ? session_strokes : "",
+                golfer_id: my_id,
+                hole_id: "cmanofyrv0001eodv22t5xen2",
+            })
+            //need to make hole_id dynamic
+            const all_sessions = await AsyncStorage.getItem('all_sessions');
+            if (all_sessions !== null) {
+                await AsyncStorage.setItem('all_sessions', all_sessions + currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
+            } else {
+                await AsyncStorage.setItem('all_sessions', currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
+            }
+            updateMySessionInfo()
+        })()
+    }
     
 
 
 
-    return <GestureHandlerRootView style={tw`h-full flex flex-col justify-between  bg-stone-300 `}>
+    return <GestureHandlerRootView style={tw`h-full flex flex-col justify-between  bg-stone-800 `}>
         {activeSession === "true" ? 
         
-        <View style={tw`flex flex-col h-full w-full items-center justify-center`}>
+        <>
+        <HitLogger currentRoundInfo={currentRoundInfo} onFinish={onFinish} onStroke={onStroke} strokeCount={strokeCount} />
+        {/*<View style={tw`flex flex-col h-full w-full items-center justify-center`}>
             <View style={tw`flex flex-col h-4/5 w-full items-center justify-center pt-16`}>
                 <View style={tw`flex-col w-full gap-x-4 h-1/8 p-4 pb-2 items-center justify-center`}>
                     <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25 }}>{currentRoundInfo.split(",")[0]}</Text>
@@ -115,42 +173,32 @@ const Hit = ({ }) => {
                         await createRound.mutateAsync({
                             round_name: currentRoundInfo.split(",")[0],
                             hit_data: session_strokes ? session_strokes : "",
-                            golfer_id: "cmamev4250000k41rp3vmpd4x",
+                            golfer_id: my_id,
                             hole_id: "cmanofyrv0001eodv22t5xen2",
                         })
                         //need to make hole_id dynamic
                         const all_sessions = await AsyncStorage.getItem('all_sessions');
                         if (all_sessions !== null) {
-                            AsyncStorage.setItem('all_sessions', all_sessions + currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
+                            await AsyncStorage.setItem('all_sessions', all_sessions + currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
                         } else {
-                            AsyncStorage.setItem('all_sessions', currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
+                            await AsyncStorage.setItem('all_sessions', currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
                         }
+                        updateMySessionInfo()
                     })()
                 }} style={tw`p-4 bg-white border border-black rounded-lg`}>
                     <Text>Finish Session</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </View>*/}</>
 
         :
 
-        <View style={tw`flex h-full w-full items-center justify-center gap-y-8`}>
-            <View style={tw`w-4/5`}><CourseSelector onSelect={(course: any, par: any) => {
-    setCurrentRoundInfo("Session 1," + course.split(", ")[0] + "," + course.split(", ")[1] + "," + par)
-  }}/></View>
-            <TouchableOpacity onPress={() => {
-                setActiveSession("true");
-                AsyncStorage.setItem('active_session', 'true');
-                AsyncStorage.setItem('stroke_count', '0');
-                AsyncStorage.setItem('session_strokes', '');
-                AsyncStorage.setItem('current_round_info', currentRoundInfo);
-                
-                setSessionStrokes("");
-                setStrokeCount("0")
-            }} style={tw`p-4 bg-white border border-black rounded-lg`}>
-                <Text>Start New Session</Text>
-            </TouchableOpacity>
-        </View>
+        <><CourseSelector onSelect={(course: any, par: any) => {
+            setCurrentRoundInfo("Session " + sessionCount.toString() + "," + course.split(", ")[0] + "," + course.split(", ")[1] + "," + par)
+          }}
+          setActiveSession={setActiveSession} setSessionStrokes={setSessionStrokes} setStrokeCount={setStrokeCount} currentRoundInfo={currentRoundInfo}
+          />
+       </>
         
         }
     </GestureHandlerRootView>

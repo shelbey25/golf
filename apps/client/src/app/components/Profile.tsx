@@ -244,7 +244,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Avg Score</Text>
-              <Text style={tw`text-white text-lg font-bold`}>{avgStrokes} ({avgStrokesVSPar > 0 ? "+" + avgStrokesVSPar : avgStrokesVSPar})</Text>
+              <Text style={tw`text-white text-lg font-bold`}>{Math.round(avgStrokes*100)/100} ({Math.round(avgStrokesVSPar*100)/100 > 0 ? "+" + Math.round(avgStrokesVSPar*100)/100 : Math.round(avgStrokesVSPar*100)/100})</Text>
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Best Round</Text>

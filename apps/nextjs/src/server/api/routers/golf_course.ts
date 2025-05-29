@@ -27,7 +27,7 @@ export const courseRouter = createTRPCRouter({
         include: {
           holes: {}
         },
-        take: 1,
+        take: 6,
       });
     }),
     getSpecificCourse: publicProcedure
