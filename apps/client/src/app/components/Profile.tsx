@@ -20,6 +20,7 @@ import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Session } from "./Sessions";
+import useMultipleS3PresignedUrl from "../hooks/useMultipleS3PresignedUrl";
 
 
 export type Coord = [number, number];
@@ -162,18 +163,51 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
 
   }, [allSessionInfo])
 
+
+    const { urls, loading, error, getPresignedUrl, clearUrls } = useMultipleS3PresignedUrl();
+  
+    const [isLoading, setIsLoading] = useState(false)
+  
+    const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+  
+    useEffect(() => {
+    const loadProfilePhotos = async () => {
+      setIsLoading(true)
+      if (!myInfo) return;
+
+      console.log(myInfo)
+  
+  
+      //Fix so maybe it is linked to the user id
+      
+      // Load all URLs in parallel
+      await getPresignedUrl(myInfo.id, myInfo.profilePhotoID)
+
+    
+      setIsLoading(false);
+  
+  
+    };
+    
+    loadProfilePhotos();
+  
+  }, [myInfo]);
+
   return (
-    <GestureHandlerRootView><ScrollView style={tw`bg-stone-800`}>
+    <GestureHandlerRootView>
+      
+      <ScrollView style={tw`bg-stone-800`}>
       <View style={tw`h-[80] w-full flex flex-col items-center justify-center pt-16`}>
           <TouchableOpacity style={tw`z-10 absolute left-4 top-16`} onPress={() => {navigation.navigate("Feed")}}>
             <Ionicons name="close-circle-outline" size={48} color="white" />
           </TouchableOpacity>
         <View style={tw`h-[50%] rounded-full border-4 border-white aspect-square`}>
-            <Image
-                source={require("../../../assets/HS.07.19.23.SH.SHC2341.jpeg")}
+        {myInfo ? <Image
+                source={{uri: urls[myInfo.id]}}
                 style={tw`w-full h-full rounded-full aspect-square`}
                 resizeMode="cover"
-              />
+              />: null}
+            
         </View>
         <View style={tw`p-2`}>
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 24, color: "white" }}>{user_name}</Text>
@@ -194,10 +228,10 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
      <View style={tw`pb-4 w-full flex items-center justify-center`}>
               <View style={tw`w-[95%] bg-stone-600 rounded-2xl p-4 `}>
           <View style={tw`flex flex-row items-center mb-4`}>
-            <Image
-              source={require("../../../assets/HS.07.19.23.SH.SHC2341.jpeg")}
+          {myInfo ? <Image
+              source={{uri: urls[myInfo.id]}}
               style={tw`w-14 h-14 rounded-full mr-4`}
-            />
+            />: null}
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 22, color: "white" }}>
               My Golf Stats
             </Text>
@@ -272,7 +306,9 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
       </View>
       <View style={tw`h-[16]`}></View>
       
-    </ScrollView></GestureHandlerRootView>
+    </ScrollView>
+    
+    </GestureHandlerRootView>
   );
 };
 

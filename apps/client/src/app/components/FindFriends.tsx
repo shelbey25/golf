@@ -8,9 +8,8 @@ import { useAppState } from './RouteWrap';
 import useS3PresignedUrl from '../hooks/useS3PresignedUrl';
 import useMultipleS3PresignedUrl from '../hooks/useMultipleS3PresignedUrl';
 
-
 const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
-  const {setPreviewProfile} = useAppState()
+  const {setPreviewProfile, setPfpUrls} = useAppState()
     const [search, setSearch] = useState('');
   const [added, setAdded] = useState<string[]>([]);
 
@@ -68,8 +67,6 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
     setIsLoading(true)
     if (!suggestedUsers) return;
 
-    console.log(suggestedUsers)
-
     //Fix so maybe it is linked to the user id
     
     // Load all URLs in parallel
@@ -78,8 +75,9 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
         getPresignedUrl(user.id, user.profilePhotoID)
       )
     );
-    
-        setIsLoading(false);
+
+  
+    setIsLoading(false);
 
 
   };
@@ -87,6 +85,13 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
   loadProfilePhotos();
 
 }, [suggestedUsers]);
+
+
+
+useEffect(() => {
+
+  setPfpUrls(urls)
+}, [urls])
 
   return (
     <View style={tw`flex-1 bg-stone-800 p-4 pt-16 pb-0`}>

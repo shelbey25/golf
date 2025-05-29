@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import tw from "twrnc";
 import Icon from 'react-native-vector-icons/Ionicons';
 
+
 import { api } from "../../utils/api";
 import { activefont, headerfont } from "../activefont";
 import { useAppState } from "./RouteWrap";
@@ -26,7 +27,7 @@ const ProfilePreview = ({ route, navigation }: {route: any, navigation: any}) =>
   
   
 
-  const { mode, setMode, club, setClub, previewProfile, setPreviewProfile, setAllSessionInfoGlobal } = useAppState();
+  const { mode, setMode, club, setClub, previewProfile, setPreviewProfile, setAllSessionInfoGlobal, pfpUrls } = useAppState();
   const [user_id, set_user_id] = useState("")
   const [user_name, set_user_name] = useState("")
 
@@ -122,6 +123,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
 
   }, [allSessionInfo])
 
+
   return (
     <GestureHandlerRootView><ScrollView style={tw`bg-stone-800`}>
       <View style={tw`h-[80] w-full flex flex-col items-center justify-center pt-16`}>
@@ -130,7 +132,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
           </TouchableOpacity>
         <View style={tw`h-[50%] rounded-full border-4 border-white aspect-square`}>
             <Image
-                source={require("../../../assets/HS.07.19.23.SH.SHC2341.jpeg")}
+                source={{uri: pfpUrls[previewProfile.id]}}
                 style={tw`w-full h-full rounded-full aspect-square`}
                 resizeMode="cover"
               />
@@ -150,12 +152,12 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
         </View>
       </View>
      
-     
-     <View style={tw`pb-4 w-full flex items-center justify-center`}>
+     {myInfo && allSessionInfo ?
+     <><View style={tw`pb-4 w-full flex items-center justify-center`}>
               <View style={tw`w-[95%] bg-stone-600 rounded-2xl p-4 `}>
           <View style={tw`flex flex-row items-center mb-4`}>
             <Image
-              source={require("../../../assets/HS.07.19.23.SH.SHC2341.jpeg")}
+              source={{uri: pfpUrls[previewProfile.id]}}
               style={tw`w-14 h-14 rounded-full mr-4`}
             />
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 22, color: "white" }}>
@@ -203,7 +205,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
         <Icon name="chevron-forward" size={28} color="white" />
       </TouchableOpacity>
       </View>
-      <View style={tw`pb-4 w-full flex items-center justify-center`}>
+      {recentCourses.length > 0 ? <View style={tw`pb-4 w-full flex items-center justify-center`}>
       <View style={tw`w-[95%] bg-stone-600 p-2 rounded-lg`}>
         <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>Recent Courses</Text>
         {recentCourses.length > 0 ? <FlatList
@@ -230,8 +232,12 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
         /> : 
         <Text style={{ fontFamily: '', paddingTop: 4, fontSize: 15, color: "white" }}>No Courses to Display</Text>
         }
-      </View>
-      </View>
+      </View> 
+      </View> : null }
+      
+      </>
+
+      : null}
       <View style={tw`h-[16]`}></View>
       
     </ScrollView></GestureHandlerRootView>

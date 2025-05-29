@@ -5,7 +5,8 @@ const StateContext = createContext<{
   mode: string; setMode: React.Dispatch<React.SetStateAction<string>>; 
   club: string; setClub: React.Dispatch<React.SetStateAction<string>>; 
   previewProfile: any; setPreviewProfile: React.Dispatch<React.SetStateAction<any>>; 
-  allSessionInfoGlobal: Session[]; setAllSessionInfoGlobal: React.Dispatch<React.SetStateAction<Session[]>>; 
+  allSessionInfoGlobal: Session[]; setAllSessionInfoGlobal: React.Dispatch<React.SetStateAction<Session[]>>;
+  pfpUrls: Record<string, string>; setPfpUrls: React.Dispatch<React.SetStateAction<Record<string, string>>>;  
 } | undefined>(undefined);
   
 
@@ -15,8 +16,9 @@ const RouteWrap = ({children}: {children: ReactNode}) => {
     const [club, setClub] = useState('');
     const [previewProfile, setPreviewProfile] = useState(null);
     const [allSessionInfoGlobal, setAllSessionInfoGlobal] = useState<Session[]>([]);
+    const [pfpUrls, setPfpUrls] = useState<Record<string, string>>({});
 
-return <StateContext.Provider value={{ mode, setMode, club, setClub, previewProfile, setPreviewProfile, allSessionInfoGlobal, setAllSessionInfoGlobal }}>{children}</StateContext.Provider>
+return <StateContext.Provider value={{ mode, setMode, club, setClub, previewProfile, setPreviewProfile, allSessionInfoGlobal, setAllSessionInfoGlobal, pfpUrls, setPfpUrls }}>{children}</StateContext.Provider>
 }
 
 export default RouteWrap
