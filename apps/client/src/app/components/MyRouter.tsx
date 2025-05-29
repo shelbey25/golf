@@ -22,7 +22,7 @@ const MyRouter = () => {
   useEffect(() => {
     (async () => {
         const basic_info = await AsyncStorage.getItem('my_basic_info');
-        console.log(basic_info)
+        //console.log(basic_info)
         if (basic_info) {
           setMode("Main")
         } else {
@@ -35,7 +35,7 @@ const MyRouter = () => {
   
 const override = false
 if (override) {
-  return <ImageCall />
+  return <LoadingImage />
 }
 
   if (mode === 'INIT') {

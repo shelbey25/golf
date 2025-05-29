@@ -6,6 +6,7 @@ import { api } from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppState } from './RouteWrap';
 import useS3PresignedUrl from '../hooks/useS3PresignedUrl';
+import useMultipleS3PresignedUrl from '../hooks/useMultipleS3PresignedUrl';
 
 
 const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
@@ -56,17 +57,36 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
       }
   };
 
-  const { url, loading, error, getPresignedUrl } = useS3PresignedUrl();
-  const [urls, setUrls] = useState<string[]>([])
+  const { urls, loading, error, getPresignedUrl, clearUrls } = useMultipleS3PresignedUrl();
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    void (async () => {
-      setUrls(suggestedUsers?.map(async (user) => {
-        await getPresignedUrl(user.profilePhotoID);
-        return url || "";
-    }) || [])
-    })()
-  }, [suggestedUsers])
+  const loadProfilePhotos = async () => {
+    setIsLoading(true)
+    if (!suggestedUsers) return;
+
+    console.log(suggestedUsers)
+
+    //Fix so maybe it is linked to the user id
+    
+    // Load all URLs in parallel
+    await Promise.all(
+      suggestedUsers.map(user => 
+        getPresignedUrl(user.id, user.profilePhotoID)
+      )
+    );
+    
+        setIsLoading(false);
+
+
+  };
+  
+  loadProfilePhotos();
+
+}, [suggestedUsers]);
 
   return (
     <View style={tw`flex-1 bg-stone-800 p-4 pt-16 pb-0`}>
@@ -90,7 +110,9 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
         />
       </View>
 
-      {suggestedUsers ? <FlatList
+    
+
+      {suggestedUsers && !isLoading ? <FlatList
         data={suggestedUsers}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
@@ -103,7 +125,7 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
           >
             <View style={tw`flex flex-row items-center justify-center gap-x-2`}><View style={tw`h-8 rounded-full border border-white aspect-square`}>
             <Image
-                source={require("../../../assets/HS.07.19.23.SH.SHC2341.jpeg")}
+                source={{uri: urls[item.id]}}
                 style={tw`w-full h-full rounded-full aspect-square`}
                 resizeMode="cover"
               />
