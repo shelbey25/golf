@@ -40,6 +40,7 @@ model GolfCourse {
   course_id String     @id @default(cuid())
   name      String     @unique @default("")
   holes     GolfHole[] @relation("course_holes")
+  location  String     @default("")
 }
 
 model GolfHole {

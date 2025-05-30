@@ -2,7 +2,7 @@ import { View, Text, TouchableOpacity} from "react-native"
 import tw from "../../utils/tailwind"
 
 
-const HitLogger = ({currentRoundInfo, onFinish, onStroke, strokeCount}: {currentRoundInfo: any, onFinish: any, onStroke: any, strokeCount: string}) => {
+const HitLogger = ({currentRoundInfo, onFinish, onStroke, strokeCount, onNextHole, displayNext }: {currentRoundInfo: any, onFinish: Function, onStroke: Function, strokeCount: string, onNextHole: Function, displayNext: boolean}) => {
 
     return <View style={tw`flex-1 bg-stone-800 p-4 h-full w-full justify-between items-center`}>
   {/* Session Header */}
@@ -40,16 +40,16 @@ const HitLogger = ({currentRoundInfo, onFinish, onStroke, strokeCount}: {current
     </TouchableOpacity>
 
     <View style={tw`flex-row justify-between`}>
-      <TouchableOpacity 
-        onPress={() => {onFinish()}}
+      {displayNext ? <TouchableOpacity 
+        onPress={() => {onNextHole()}}
         style={tw`bg-green-600 rounded-xl p-4 flex-1 mr-2 items-center justify-center shadow-md`}
       >
         <Text style={tw`text-white font-bold`}>Next Hole</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> : null}
       
       <TouchableOpacity 
-        onPress={() => {}}
-        style={tw`bg-red-500 rounded-xl p-4 flex-1 ml-2 items-center justify-center shadow-md`}
+        onPress={() => {onFinish()}}
+        style={tw`bg-red-500 rounded-xl p-4 flex-1 ${displayNext ? "ml-2" : ""} items-center justify-center shadow-md`}
       >
         <Text style={tw`text-white font-bold`}>Finish Session</Text>
       </TouchableOpacity>

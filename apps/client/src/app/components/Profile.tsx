@@ -101,7 +101,7 @@ const Profile = ({ route, navigation }: {route: any, navigation: any}) => {
 
   useEffect(() => {
     void (async () => {
-      const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(",\\\\") || [];
+      const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(/,\\\\|null\\\\/) || [];
       let longestHit = 0;
       set_AllSessionInfo(all_sessions.map((session) => {
           if (session === null || session === "") {

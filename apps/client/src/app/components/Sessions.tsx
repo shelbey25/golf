@@ -50,7 +50,7 @@ const Sessions = ({ }: {}) => {
 
   useEffect(() => {
     void (async () => {
-      const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(",\\\\") || [];
+      const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(/,\\\\|null\\\\/) || [];
       set_AllSessionInfo(all_sessions.map((session) => {
           if (session === null || session === "") {
             return null

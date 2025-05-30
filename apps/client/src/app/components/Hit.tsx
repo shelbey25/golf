@@ -7,7 +7,20 @@ import * as Location from 'expo-location';
 import { api } from "../../utils/api";
 import CourseSelector from "./CourseSelector";
 import HitLogger from "./HitLogger";
+import LoadingScreen from "./Loading";
 
+type Hole = {
+    courseId: string;
+    hole_id: string;
+    hole_number: number;
+    par: number;
+  };
+  
+  type Course = {
+    course_id: string;
+    name: string;
+    holes: Hole[];
+  };
 
 const Hit = ({ }) => {
 
@@ -17,9 +30,20 @@ const Hit = ({ }) => {
     const [sessionCount, setSessionCount] = useState(0)
     const [my_id, set_my_id] = useState("")
 
+    /*useEffect(() => {
+         AsyncStorage.setItem('all_sessions', "")
+    }, [])*/
+
     const updateMySessionInfo = async () => {
-        const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(",\\\\") || [];
-        setSessionCount(all_sessions.length)
+        const all_sessions = (await AsyncStorage.getItem('all_sessions'))?.split(/,\\\\|null\\\\/) || [];
+        const seen = new Set<string>();
+        const uniqueSessions = all_sessions.filter(session => {
+        const key = session.split(",")[0];
+        if (seen.has(key) || !key || key === "") return false;
+        seen.add(key);
+        return true;
+        });
+        setSessionCount(uniqueSessions.length + 1)
     }
 
     useEffect(() => {
@@ -77,6 +101,7 @@ const Hit = ({ }) => {
                 await AsyncStorage.setItem('current_round_info', "");
                 setCurrentRoundInfo("")
             } else {
+                console.log(roundInfo)
                 setCurrentRoundInfo(roundInfo)
             }
         })()
@@ -89,6 +114,88 @@ const Hit = ({ }) => {
             setSessionStrokes(session_strokes || "")
         })()
     }, [])
+
+    const [query, setQuery] = useState('');
+    const queryHook = api.courses.getByName.useQuery(
+    { query },
+    { enabled: false }
+    );
+
+    const [currentCourse, setCurrentCourse] = useState<Course | null>(null)
+
+    const updateCurrentCourseInfo = async () => {
+        if (activeSession === "true") {
+            const currentCourseName = currentRoundInfo.split(",")[1]
+            setQuery(currentCourseName);
+
+            await new Promise(resolve => setTimeout(resolve, 0)); // wait 1 tick
+
+            const result = await queryHook.refetch();
+            if (result.data) {
+                setCurrentCourse(result.data)
+            }
+        }
+    }
+
+
+    useEffect(() => {updateCurrentCourseInfo()}, [])
+
+    useEffect(() => {
+        updateCurrentCourseInfo()
+    }, [currentRoundInfo, currentCourse, activeSession])
+
+    const [nextHoleIsLoading, setNextHoleIsLoading] = useState(false)
+
+
+    const onNextHole = () => {
+        void (async () => {
+            setNextHoleIsLoading(true)
+            const currentHole = parseInt(currentRoundInfo.split(",")[2].split(" ")[1])
+
+            if (currentCourse !== null) {
+
+
+            const holesOnCourse = currentCourse?.holes.length
+
+            if (holesOnCourse && currentHole+1 <= holesOnCourse) {
+                const session_strokes = await AsyncStorage.getItem('session_strokes');
+
+            const holeId = currentCourse ? currentCourse.holes.filter((hole) => {
+                return currentHole === hole.hole_number
+            })[0].hole_id : ""
+
+            await createRound.mutateAsync({
+                round_name: currentRoundInfo.split(",")[0],
+                hit_data: session_strokes ? session_strokes : "",
+                golfer_id: my_id,
+                hole_id: holeId,
+            })
+            const all_sessions = await AsyncStorage.getItem('all_sessions');
+            if (all_sessions !== null) {
+                await AsyncStorage.setItem('all_sessions', all_sessions + currentRoundInfo + "," + holeId + "," + session_strokes + "\\\\");
+            } else {
+                await AsyncStorage.setItem('all_sessions', currentRoundInfo + "," + holeId + "," + session_strokes + "\\\\");
+            }
+            updateMySessionInfo()
+
+            const newCurrentRoundInfo = currentRoundInfo.split(",")[0] + "," + currentRoundInfo.split(",")[1] + ",Hole " + (currentHole + 1).toString() + "," +  currentCourse.holes.filter((hole) => {
+                return (currentHole+1) === hole.hole_number
+            })[0].par
+
+
+            await AsyncStorage.setItem('current_round_info', newCurrentRoundInfo);
+            setCurrentRoundInfo(newCurrentRoundInfo)
+
+            AsyncStorage.setItem('stroke_count', '0');
+            AsyncStorage.setItem('session_strokes', '');
+            
+            setSessionStrokes("");
+            setStrokeCount("0")
+            setNextHoleIsLoading(false)
+            }
+        }
+        })()
+    }
 
     const onStroke = () => {
         void (async () => {
@@ -105,91 +212,39 @@ const Hit = ({ }) => {
     const onFinish = () => {
         setActiveSession("false");
         AsyncStorage.setItem('active_session', 'false');
+        const currentHole = parseInt(currentRoundInfo.split(",")[2].split(" ")[1])
         void (async () => {
             const session_strokes = await AsyncStorage.getItem('session_strokes');
+            const holeId = currentCourse ? currentCourse.holes.filter((hole) => {
+                return currentHole === hole.hole_number
+            })[0].hole_id : ""
             await createRound.mutateAsync({
                 round_name: currentRoundInfo.split(",")[0],
                 hit_data: session_strokes ? session_strokes : "",
                 golfer_id: my_id,
-                hole_id: "cmanofyrv0001eodv22t5xen2",
+                hole_id: holeId,
             })
             //need to make hole_id dynamic
             const all_sessions = await AsyncStorage.getItem('all_sessions');
             if (all_sessions !== null) {
-                await AsyncStorage.setItem('all_sessions', all_sessions + currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
+                await AsyncStorage.setItem('all_sessions', all_sessions + currentRoundInfo + "," + holeId + "," + session_strokes + "\\\\");
             } else {
-                await AsyncStorage.setItem('all_sessions', currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
+                await AsyncStorage.setItem('all_sessions', currentRoundInfo + "," + holeId + "," + session_strokes + "\\\\");
             }
             updateMySessionInfo()
         })()
     }
+
     
-
-
 
     return <GestureHandlerRootView style={tw`h-full flex flex-col justify-between  bg-stone-800 `}>
         {activeSession === "true" ? 
         
         <>
-        <HitLogger currentRoundInfo={currentRoundInfo} onFinish={onFinish} onStroke={onStroke} strokeCount={strokeCount} />
-        {/*<View style={tw`flex flex-col h-full w-full items-center justify-center`}>
-            <View style={tw`flex flex-col h-4/5 w-full items-center justify-center pt-16`}>
-                <View style={tw`flex-col w-full gap-x-4 h-1/8 p-4 pb-2 items-center justify-center`}>
-                    <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25 }}>{currentRoundInfo.split(",")[0]}</Text>
-                    <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 20 }}>{currentRoundInfo.split(",")[1] + ", " + currentRoundInfo.split(",")[2]}</Text>
-                </View>
-                <View style={tw`flex-row w-full h-1/2 p-4 pb-2 items-center justify-center`}>
-                    <TouchableOpacity 
-                    onPress={() => {
-                        void (async () => {
-                            await AsyncStorage.setItem('stroke_count', (parseInt(strokeCount)+1).toString());
-                            setStrokeCount((parseInt(strokeCount)+1).toString())
-
-                            const location = await Location.getCurrentPositionAsync({});
-                            const new_coord_set = location?.coords.latitude + "," + location?.coords.longitude + ","
-                            setSessionStrokes(sessionStrokes + new_coord_set);
-                            AsyncStorage.setItem('session_strokes', sessionStrokes + new_coord_set);
-                        })()
-                    }}
-                    style={tw`flex h-full aspect-square bg-blue-300 rounded-lg items-center justify-center`}>
-                        <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25 }}>Log Stroke</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={tw`flex-row w-full gap-x-4 h-3/8 p-4 pb-2 items-center justify-center`}>
-                    <Text>
-                        Par: {currentRoundInfo.split(",")[3]}
-                    </Text>
-                    <Text>
-                        {"Stokes: " + strokeCount}
-                    </Text>
-                </View>
-            </View>
-            <View style={tw`flex h-1/5 w-full items-center justify-center`}>
-                <TouchableOpacity onPress={() => {
-                    setActiveSession("false");
-                    AsyncStorage.setItem('active_session', 'false');
-                    void (async () => {
-                        const session_strokes = await AsyncStorage.getItem('session_strokes');
-                        await createRound.mutateAsync({
-                            round_name: currentRoundInfo.split(",")[0],
-                            hit_data: session_strokes ? session_strokes : "",
-                            golfer_id: my_id,
-                            hole_id: "cmanofyrv0001eodv22t5xen2",
-                        })
-                        //need to make hole_id dynamic
-                        const all_sessions = await AsyncStorage.getItem('all_sessions');
-                        if (all_sessions !== null) {
-                            await AsyncStorage.setItem('all_sessions', all_sessions + currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
-                        } else {
-                            await AsyncStorage.setItem('all_sessions', currentRoundInfo + "," + "cmanofyrv0001eodv22t5xen2" + "," + session_strokes + "\\\\");
-                        }
-                        updateMySessionInfo()
-                    })()
-                }} style={tw`p-4 bg-white border border-black rounded-lg`}>
-                    <Text>Finish Session</Text>
-                </TouchableOpacity>
-            </View>
-        </View>*/}</>
+        {nextHoleIsLoading ? 
+        <LoadingScreen />
+        : <HitLogger displayNext={(currentCourse && parseInt(currentRoundInfo.split(",")[2].split(" ")[1])+1 <= currentCourse.holes.length) || false} currentRoundInfo={currentRoundInfo} onFinish={onFinish} onStroke={onStroke} strokeCount={strokeCount} onNextHole={onNextHole} />}
+        </>
 
         :
 

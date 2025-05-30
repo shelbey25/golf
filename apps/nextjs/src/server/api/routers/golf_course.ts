@@ -14,6 +14,31 @@ export const courseRouter = createTRPCRouter({
       
     });
   }),
+  getByName: publicProcedure
+    .input(z.object({ query: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return ctx.prisma.golfCourse.findFirst({
+        where: {
+          name: input.query,
+        },
+        include: {
+          holes: {}
+        },
+      });
+    }),
+    getSpecificCourse: publicProcedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const {name} = input
+      return ctx.prisma.golfCourse.findFirst({
+        where: {
+          name: name,
+        },
+        include: {
+          holes: {}
+        },
+      });
+    }),
   search: publicProcedure
     .input(z.object({ query: z.string().optional() }))
     .query(async ({ ctx, input }) => {

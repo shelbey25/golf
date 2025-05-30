@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, TextInput, FlatList, TouchableOpacity, Text } from "react-native";
 import { api } from "../../utils/api";
 import tw from "../../utils/tailwind";
@@ -10,6 +10,18 @@ const CourseSelector = ({ onSelect, setActiveSession, setSessionStrokes, setStro
     const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState("");
   const { data: results } = api.courses.search.useQuery({ query });
+
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    if ((results?.filter((result) => {
+      return result.name === query
+    }).length || 0) > 0) {
+      setIsReady(true)
+    } else {
+      setIsReady(false)
+    }
+  }, [results, query])
 
 
   return (
@@ -56,7 +68,7 @@ const CourseSelector = ({ onSelect, setActiveSession, setSessionStrokes, setStro
               style={tw`p-4 ${index === (results ? results.length : 0) - 1 ? "" : "border-b border-gray-100"}`}>
                 <Text style={tw`font-medium text-gray-800`}>{item.name}</Text>
                 <Text style={tw`text-sm text-gray-500 mt-1`}>
-                  {"London, England"}
+                  {item.location}
                 </Text>
               </TouchableOpacity>
             )}
@@ -66,8 +78,8 @@ const CourseSelector = ({ onSelect, setActiveSession, setSessionStrokes, setStro
   
       {/* Start Button - Static Active State */}
       <TouchableOpacity 
-        style={tw`w-full py-5 rounded-xl bg-stone-600 shadow-lg flex items-center justify-center`}
-      
+        style={tw`w-full py-5 rounded-xl ${isReady ? "bg-green-600" : "bg-stone-600"} shadow-lg flex items-center justify-center`}
+            disabled={!isReady}
         onPress={() => {
           setActiveSession("true");
           AsyncStorage.setItem('active_session', 'true');
