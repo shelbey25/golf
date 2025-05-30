@@ -243,7 +243,9 @@ const Hit = ({ }) => {
         <>
         {nextHoleIsLoading ? 
         <LoadingScreen />
-        : <HitLogger displayNext={(currentCourse && parseInt(currentRoundInfo.split(",")[2].split(" ")[1])+1 <= currentCourse.holes.length) || false} currentRoundInfo={currentRoundInfo} onFinish={onFinish} onStroke={onStroke} strokeCount={strokeCount} onNextHole={onNextHole} />}
+        : <HitLogger 
+        session_strokes={sessionStrokes}
+        displayNext={(currentCourse && parseInt(currentRoundInfo.split(",")[2].split(" ")[1])+1 <= currentCourse.holes.length) || false} currentRoundInfo={currentRoundInfo} onFinish={onFinish} onStroke={onStroke} strokeCount={strokeCount} onNextHole={onNextHole} />}
         </>
 
         :
