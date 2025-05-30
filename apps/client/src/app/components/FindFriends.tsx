@@ -46,15 +46,35 @@ const FindFriends = ({ route, navigation }: {route: any, navigation: any}) => {
     })();
   }, []);
 
+  const startFollowing = api.golf_user.startFollowing.useMutation()
+  const stopFollowing = api.golf_user.removeFollowing.useMutation()
+
   const handleAdd = (id: string) => {
     if (added.includes(id)) {
         // Remove from added
         setAdded(added.filter(existingId => existingId !== id));
+        stopFollowing.mutate({userMyId: currentUserId, userNewId: id})
       } else {
         // Add to list
+        startFollowing.mutate({userMyId: currentUserId, userNewId: id})
         setAdded([...added, id]);
       }
   };
+
+  const {data: myInfo, refetch: refetchMyInfo} = api.golf_user.getMyInfo.useQuery({
+    my_id: currentUserId
+  })
+
+  useEffect(() => {
+    refetchMyInfo()
+  }, [currentUserId])
+
+  useEffect(() => {
+    const followingIds = myInfo?.following.map((following) => following.id)
+    if (followingIds) {
+      setAdded(prev => Array.from(new Set([...prev, ...followingIds])));
+    }
+  }, [myInfo])
 
   const { urls, loading, error, getPresignedUrl, clearUrls } = useMultipleS3PresignedUrl();
 

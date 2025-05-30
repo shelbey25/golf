@@ -159,5 +159,42 @@ export const golfUserRouter = createTRPCRouter({
       }
     });
   }),
+  startFollowing: publicProcedure.input(
+    z.object({
+      userMyId: z.string(),
+      userNewId: z.string(),
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const {userMyId, userNewId} = input
+    return await ctx.prisma.golfer.update({
+      where: {
+        id: userMyId,
+      },
+      data: {
+        following: {
+          connect: { id: userNewId },
+      }
+      },
+    })
+  }),
+  removeFollowing: publicProcedure.input(
+    z.object({
+      userMyId: z.string(),
+      userNewId: z.string(),
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const {userMyId, userNewId} = input
+    return await ctx.prisma.golfer.update({
+      where: {
+        id: userMyId,
+      },
+      data: {
+        following: {
+          disconnect: { id: userNewId },
+      }
+      },
+    })
+  }),
+
 
 });

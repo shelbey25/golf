@@ -112,8 +112,8 @@ allSessionInfo.forEach((session) => {
     birdiesCount += 1
   }
 });
-setAvgStrokes(totalStrokes/allSessionInfo.length)
-setAvgStrokesVSPar((totalStrokes-totalPar)/allSessionInfo.length)
+setAvgStrokes(allSessionInfo.length > 0 ? totalStrokes/allSessionInfo.length : 0)
+setAvgStrokesVSPar(allSessionInfo.length > 0 ? (totalStrokes-totalPar)/allSessionInfo.length : 0)
 setEagles(eaglesCount)
 setBirdies(birdiesCount)
 

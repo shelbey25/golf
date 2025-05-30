@@ -82,7 +82,7 @@ const SessionPreview = ({ }: {}) => {
         </View>
         : null}</>
       )}
-      keyExtractor={item => item.name}
+      keyExtractor={item => item.name + " " + item.holeId}
     />
     </View>
   );
