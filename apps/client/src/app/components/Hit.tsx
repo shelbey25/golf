@@ -8,6 +8,7 @@ import { api } from "../../utils/api";
 import CourseSelector from "./CourseSelector";
 import HitLogger from "./HitLogger";
 import LoadingScreen from "./Loading";
+import SessionMediaUpload from "./SubmitMedia";
 
 type Hole = {
     courseId: string;
@@ -209,7 +210,11 @@ const Hit = ({ }) => {
         })()
     }
 
+    const [uploadMedia, setUploadMedia] = useState(false)
+    const [mostRecentRoundID, setMostRecentRoundID] = useState("")
+
     const onFinish = () => {
+        setUploadMedia(true)
         setActiveSession("false");
         AsyncStorage.setItem('active_session', 'false');
         const currentHole = parseInt(currentRoundInfo.split(",")[2].split(" ")[1])
@@ -218,12 +223,13 @@ const Hit = ({ }) => {
             const holeId = currentCourse ? currentCourse.holes.filter((hole) => {
                 return currentHole === hole.hole_number
             })[0].hole_id : ""
-            await createRound.mutateAsync({
+            const round_info = await createRound.mutateAsync({
                 round_name: currentRoundInfo.split(",")[0],
                 hit_data: session_strokes ? session_strokes : "",
                 golfer_id: my_id,
                 hole_id: holeId,
             })
+            setMostRecentRoundID(round_info.round_id)
             //need to make hole_id dynamic
             const all_sessions = await AsyncStorage.getItem('all_sessions');
             if (all_sessions !== null) {
@@ -233,6 +239,18 @@ const Hit = ({ }) => {
             }
             updateMySessionInfo()
         })()
+    }
+
+    const updateFlic = api.golf_session.addImg.useMutation()
+
+    if (uploadMedia) {
+        return <SessionMediaUpload 
+        onSkip={() => {setUploadMedia(false)}}
+        onComplete={()  => {
+            setUploadMedia(false)
+        }}
+        round_id={mostRecentRoundID}
+        />
     }
 
     

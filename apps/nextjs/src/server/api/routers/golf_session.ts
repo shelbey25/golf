@@ -43,4 +43,22 @@ export const golfSessionRouter = createTRPCRouter({
       },
     });
   }),
+  addImg: publicProcedure
+  .input(
+    z.object({
+      img_key: z.string(),
+      round_id: z.string(),
+    })
+  )
+  .mutation(async ({ ctx, input }) => {
+    const {img_key, round_id} = input
+    return await ctx.prisma.round.update({
+      where: {
+        round_id: round_id,
+      },
+      data: {
+        attachedPhotoID: img_key,
+      },
+    });
+  }),
 });

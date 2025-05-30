@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post';
 import { S3Client } from '@aws-sdk/client-s3';
+import { api } from 'src/utils/api';
 
 export default async function handler(
   req: NextApiRequest,
@@ -9,7 +10,7 @@ export default async function handler(
   if (req.method !== 'POST') return res.status(405).end();
 
   const { filename, contentType } = req.body;
-
+  
   const client = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
@@ -18,9 +19,11 @@ export default async function handler(
     },
   });
 
+  const img_key = `${Date.now()}-${filename}`
+
   const { url, fields } = await createPresignedPost(client, {
     Bucket: process.env.AWS_BUCKET_NAME!,
-    Key: `${Date.now()}-${filename}`,
+    Key: img_key,
     Conditions: [
       ['content-length-range', 0, 10485760], // 10MB max
       ['starts-with', '$Content-Type', contentType],
@@ -30,5 +33,5 @@ export default async function handler(
     },
   });
 
-  res.status(200).json({ url, fields });
+  res.status(200).json({ url, fields, img_key });
 }

@@ -14,6 +14,8 @@ import LoadingScreen from "./Loading";
 import CreateAccount from "./AccountCreation";
 import UploadImageScreen from "./ImageUpload";
 import ImageCall from "./ImageCall";
+import SessionMediaUpload from "./SubmitMedia";
+import UploadScreen from "./ImageUpload";
 
 const MyRouter = () => {
   
@@ -35,7 +37,7 @@ const MyRouter = () => {
   
 const override = false
 if (override) {
-  return <LoadingImage />
+  return <UploadScreen />
 }
 
   if (mode === 'INIT') {
