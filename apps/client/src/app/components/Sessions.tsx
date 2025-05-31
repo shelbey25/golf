@@ -28,6 +28,11 @@ export type Session = {
   date: Date;
 }
 
+type GroupedSession = {
+  name: string;
+  sessions: any[];
+}
+
 const Sessions = ({ }: {}) => {
   
   //also need to make able to select other holes not in immediate suggested
@@ -69,11 +74,88 @@ const Sessions = ({ }: {}) => {
     })()
   }, [])  
 
-  console.log(allSessionInfo)
+  const [groupedInfo, setGroupedInfo] = useState<GroupedSession[]>([])
+  useEffect(() =>
+  {
+    const grouped = Object.entries(allSessionInfo.reduce((acc, session) => {
+      const key = session.name;
+    
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+    
+      acc[key].push(session);
+    
+      return acc;
+    }, {} as Record<string, typeof allSessionInfo>)).map(([name, sessions]) => ({ name, sessions }));;
+
+    setGroupedInfo(grouped)
+  }, [allSessionInfo])
+
+  console.log(groupedInfo)
 
   return (
     <View style={tw`h-full flex flex-col justify-between  bg-stone-800 `}>
       <FlatList
+      data={groupedInfo}
+      renderItem={({ item }) => (
+        <>{item ?
+        <View style={tw`p-4 justify-center items-center`}>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>{item.name}</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].course}, {item.sessions[0].hole} {"(Par " + item.sessions[0].par + ")"}</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].hits.length} Strokes</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].date.toDateString()}</Text>
+            <View style={tw`h-[4]`}></View>
+            
+            
+            <FlatList
+            style={tw`w-80`}
+  data={item.sessions}
+  horizontal
+  pagingEnabled
+  showsHorizontalScrollIndicator={false}
+  keyExtractor={(smItem, index) => index.toString()}
+  renderItem={({ item: smItem }) => (
+  <MapView
+                mapType="satellite"
+                style={tw`w-80 aspect-3/2 rounded-md`}
+                initialRegion={{
+                latitude: (smItem.hits[0][0]+smItem.hits[smItem.hits.length-1][0])/2, // Replace with the latitude of your golf course
+                longitude: (smItem.hits[0][1]+smItem.hits[smItem.hits.length-1][1])/2, // Replace with the longitude of your golf course
+                latitudeDelta: Math.abs(smItem.hits[0][0]-smItem.hits[smItem.hits.length-1][0])*1.2 > 0.001 ? Math.abs(smItem.hits[0][0]-smItem.hits[smItem.hits.length-1][0])*1.2 : 0.001,
+                longitudeDelta: Math.abs(smItem.hits[0][1]-smItem.hits[smItem.hits.length-1][1])*1.2 > 0.001 ?  Math.abs(smItem.hits[0][1]-smItem.hits[smItem.hits.length-1][1])*1.2 : 0.001,
+                }}
+                scrollEnabled={false}   
+                zoomEnabled={false}      
+                pitchEnabled={false}   
+                rotateEnabled={false}    
+                showsUserLocation={false}
+            >
+                {smItem.hits.map((hit: any, index: number) => (
+                    <Marker key={index} coordinate={{ latitude: hit[0], longitude: hit[1] }}>
+                        <View style={tw`h-2 w-2 ${index == 0 ? "bg-red-500" : index == smItem.hits.length-1 ? "bg-green-500" : "bg-slate-900"} rounded-full`}></View>
+                    </Marker>
+                ))
+                }
+                <Polyline
+                    coordinates={smItem.hits.map((hit: any) => ({
+                    latitude: hit[0],
+                    longitude: hit[1],
+                    }))}
+                    strokeColor="#FFFFFF" // red line
+                    strokeWidth={3}
+                />
+            </MapView>)} />
+
+
+
+
+        </View>
+        : null}</>
+      )}
+      keyExtractor={item => item.name}
+    />
+      {/*<FlatList
       data={allSessionInfo}
       renderItem={({ item }) => (
         <>{item ?
@@ -117,7 +199,7 @@ const Sessions = ({ }: {}) => {
         : null}</>
       )}
       keyExtractor={item => item.name + " " + item.holeId}
-    />
+    />*/}
     </View>
   );
 };

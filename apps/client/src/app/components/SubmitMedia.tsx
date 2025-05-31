@@ -50,9 +50,9 @@ const SessionMediaUpload = ({ onComplete, onSkip, round_id }: {onComplete: Funct
         });
 
         if (!uploadRes.ok) throw new Error('Upload failed');
-        Alert.alert('Success!', 'Image uploaded to S3');
+       // Alert.alert('Success!', 'Image uploaded to S3');
       } catch (error) {
-        Alert.alert('Error');
+        //Alert.alert('Error');
       } finally {
         return img_key_saved
       }
@@ -132,7 +132,8 @@ const updateFlic = api.golf_session.addImg.useMutation()
       </TouchableOpacity>
 
       {/* Action Buttons */}
-      <View style={tw`flex-row justify-between mt-2`}>
+      <View style={tw`absolute bottom-8 left-6 flex w-full justify-center items-center`}>
+      <View style={tw`flex-row justify-between mt-2 `}>
         <TouchableOpacity 
           onPress={() => {
             onSkip()
@@ -156,6 +157,7 @@ const updateFlic = api.golf_session.addImg.useMutation()
             <Text style={tw`text-stone-100 font-bold`}>Upload</Text>
           )}
         </TouchableOpacity>
+      </View>
       </View>
     </View>
 }</>
