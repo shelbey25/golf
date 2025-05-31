@@ -2,6 +2,7 @@ import { golfUserRouter } from "./routers/golf_user";
 import { courseRouter } from "./routers/golf_course";
 import { createTRPCRouter } from "./trpc";
 import { golfSessionRouter } from "./routers/golf_session";
+import { golf_rounds } from "./routers/golf_rounds";
 
 /**
  * This is the primary router for your server.
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
   golf_user: golfUserRouter,
   courses: courseRouter,
   golf_session: golfSessionRouter,
+  golf_rounds: golf_rounds,
 });
 
 // export type definition of API

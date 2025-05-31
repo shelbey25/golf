@@ -3,6 +3,8 @@ import {
     FlatList,
   Image,
   ImageBackground,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   Text,
   TouchableOpacity,
@@ -26,6 +28,7 @@ export type Session = {
   holeId: string;
   hits: number[][];
   date: Date;
+  imageId: string;
 }
 
 type GroupedSession = {
@@ -69,6 +72,7 @@ const Sessions = ({ }: {}) => {
             holeId: indexed_session[4],
             hits: pairCoords(indexed_session.slice(5).map(s => Number(s))),
             date: new Date(),
+            imageId: "", //add image ID
           }
       }).filter((result) => result !== null))
     })()
@@ -87,18 +91,26 @@ const Sessions = ({ }: {}) => {
       acc[key].push(session);
     
       return acc;
-    }, {} as Record<string, typeof allSessionInfo>)).map(([name, sessions]) => ({ name, sessions }));;
+    }, {} as Record<string, typeof allSessionInfo>)).map(([name, sessions]) => ({ name, sessions }));
 
     setGroupedInfo(grouped)
   }, [allSessionInfo])
 
-  console.log(groupedInfo)
+  console.log(groupedInfo[0].sessions[0])
+const [activeIndices, setActiveIndices] = useState<{ [key: number]: number }>({});
+const handleInnerScroll = (outerIndex: number, e: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const innerIndex = Math.round(
+    e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+  );
+  setActiveIndices(prev => ({ ...prev, [outerIndex]: innerIndex }));
+};
 
   return (
     <View style={tw`h-full flex flex-col justify-between  bg-stone-800 `}>
       <FlatList
       data={groupedInfo}
-      renderItem={({ item }) => (
+      keyExtractor={(_, outerIndex) => outerIndex.toString()}
+      renderItem={({ item, index: outerIndex }) => (
         <>{item ?
         <View style={tw`p-4 justify-center items-center`}>
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>{item.name}</Text>
@@ -114,11 +126,12 @@ const Sessions = ({ }: {}) => {
   horizontal
   pagingEnabled
   showsHorizontalScrollIndicator={false}
-  keyExtractor={(smItem, index) => index.toString()}
+  keyExtractor={(_, innerIndex) => innerIndex.toString()}
+  onScroll={e => handleInnerScroll(outerIndex, e)}
   renderItem={({ item: smItem }) => (
   <MapView
                 mapType="satellite"
-                style={tw`w-80 aspect-3/2 rounded-md`}
+                style={tw`w-80 aspect-square rounded-md`}
                 initialRegion={{
                 latitude: (smItem.hits[0][0]+smItem.hits[smItem.hits.length-1][0])/2, // Replace with the latitude of your golf course
                 longitude: (smItem.hits[0][1]+smItem.hits[smItem.hits.length-1][1])/2, // Replace with the longitude of your golf course
@@ -148,12 +161,24 @@ const Sessions = ({ }: {}) => {
             </MapView>)} />
 
 
+            <View style={tw`flex-row justify-center absolute bottom-7 bg-stone-600 p-2 rounded-lg opacity-100`}>
+        {item.sessions.map((_, i) => (
+          <View
+            key={i}
+            style={tw`h-2 w-2 rounded-full mx-1 ${
+              (activeIndices[outerIndex] ?? 0) === i
+                ? 'bg-blue-500'
+                : 'bg-gray-300'
+            }`}
+          />
+        ))}
+      </View>
 
 
         </View>
         : null}</>
       )}
-      keyExtractor={item => item.name}
+      
     />
       {/*<FlatList
       data={allSessionInfo}
