@@ -16,9 +16,24 @@ import UploadImageScreen from "./ImageUpload";
 import ImageCall from "./ImageCall";
 import SessionMediaUpload from "./SubmitMedia";
 import UploadScreen from "./ImageUpload";
+import ProfilePhoto from "./ProfilePhoto";
+import SignInScreen from "./SignIn";
+
+async function resetAllKeysToNull() {
+  try {
+    const keys = await AsyncStorage.getAllKeys(); // get all keys
+
+    // Create array of promises to set each key to 'null' (string)
+    const resetPromises = keys.map(key => AsyncStorage.setItem(key, ''));
+
+    await Promise.all(resetPromises); // wait for all to complete
+    console.log('All keys reset to null');
+  } catch (error) {
+    console.error('Error resetting keys:', error);
+  }
+}
 
 const MyRouter = () => {
-  
   const { mode, setMode } = useAppState();
 
   useEffect(() => {
@@ -37,13 +52,17 @@ const MyRouter = () => {
   
 const override = false
 if (override) {
-  return <UploadScreen />
+  return <SignInScreen />
 }
 
   if (mode === 'INIT') {
     return <LoadingScreen />
   } else if (mode === "Account Creation") {
     return <CreateAccount />
+} else if (mode === "SignIn") {
+  return <SignInScreen />
+} else if (mode === "Add PFP") {
+  return <ProfilePhoto />
 } else if (mode === "Main") {
     return (
       <Suspense fallback={null}>

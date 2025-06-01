@@ -4,37 +4,44 @@ import tw from "twrnc";
 import { api } from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAppState } from "./RouteWrap";
+import LoadingScreen from "./Loading";
 
 export default function CreateAccount() {
   const {setMode} = useAppState()
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isUploading, setIsUploading] = useState(false)
   const creatAccount = api.golf_user.createUser.useMutation({
     onSuccess: async (result) => {
       await AsyncStorage.setItem('my_basic_info', result);
-      const my_info = await AsyncStorage.getItem('my_basic_info')
-      console.log(my_info)
-      setMode("Main")
+      setMode("Add PFP")
+      setIsUploading(false)
     }
   })
 
   const handleCreateAccount = async () => {
-
+    setIsUploading(true)
     await creatAccount.mutateAsync({
       name: name,
       email: email,
       password: password
     })
+    setIsUploading(false)
   };
 
+  if (isUploading) {
+    return <LoadingScreen />
+  }
+
   return (
-    <View style={tw`flex-1 bg-slate-800 justify-center px-6`}>
+    <View style={tw`flex-1 bg-stone-800 justify-center px-6`}>
       <Text style={tw`text-2xl font-bold mb-6 text-white text-center`}>Create an Account</Text>
 
       <TextInput
         placeholder="Name"
         value={name}
+        placeholderTextColor="#a8a29e"
         onChangeText={setName}
         style={tw`border text-white border-gray-300 rounded-lg px-4 py-3 mb-4`}
       />
@@ -44,6 +51,7 @@ export default function CreateAccount() {
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
+        placeholderTextColor="#a8a29e"
         autoCapitalize="none"
         style={tw`border text-white border-gray-300 rounded-lg px-4 py-3 mb-4`}
       />
@@ -52,6 +60,7 @@ export default function CreateAccount() {
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
+        placeholderTextColor="#a8a29e"
         secureTextEntry
         style={tw`border text-white border-gray-300 rounded-lg px-4 py-3 mb-6`}
       />
@@ -65,7 +74,7 @@ export default function CreateAccount() {
 
       <View style={tw`mt-4 flex-row justify-center`}>
   <Text style={tw`text-gray-400`}>Already have an account? </Text>
-  <TouchableOpacity >
+  <TouchableOpacity onPress={() => {setMode("SignIn")}}>
     <Text style={tw`text-blue-500 font-semibold`}>Sign in</Text>
   </TouchableOpacity>
 </View>

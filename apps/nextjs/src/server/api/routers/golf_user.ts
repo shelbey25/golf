@@ -35,6 +35,23 @@ export const golfUserRouter = createTRPCRouter({
 
     return newUser.id + "\\" + newUser.name;
   }),
+  verifyUser: publicProcedure.input(
+    z.object({
+      email: z.string().email(),
+      password: z.string(),
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const { email, password } = input;
+  
+    const user = await ctx.prisma.golfer.findUnique({
+      where: { email },
+    });
+  
+    if (!user || !user.password) return {isValid: false, id: "", result: ""};
+  
+    const isValid = await bcrypt.compare(password, user.password) as boolean;
+    return {isValid: isValid, id: user.id, result: user.id + "\\" + user.name};
+  }),
   getMyInfo: publicProcedure.input(
     z.object({
       my_id: z.string(),
@@ -195,7 +212,24 @@ export const golfUserRouter = createTRPCRouter({
       },
     })
   }),
-  
+  updateImg: publicProcedure
+  .input(
+    z.object({
+      img_key: z.string(),
+      user_id: z.string(),
+    })
+  )
+  .mutation(async ({ ctx, input }) => {
+    const {img_key, user_id} = input
+    return await ctx.prisma.golfer.update({
+      where: {
+        id: user_id,
+      },
+      data: {
+        profilePhotoID: img_key,
+      },
+    });
+  }),
 
 
 });

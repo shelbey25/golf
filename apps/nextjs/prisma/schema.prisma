@@ -28,12 +28,20 @@ model Round {
   hit_data        String   @default("")
   date            DateTime @default(now())
   golfer          Golfer   @relation("golf_round", fields: [golferId], references: [id])
-  hits            Hits[]   @relation("round_strokes")
   hole            GolfHole @relation("round_holes", fields: [holeId], references: [hole_id])
   attachedPhotoID String   @default("")
+  postGroup       Post     @relation("post_rounds", fields: [postId], references: [id])
+  postId          String
 
+  @@index([postId])
   @@index([golferId])
   @@index([holeId])
+}
+
+model Post {
+  id     String  @id @default(cuid())
+  rounds Round[] @relation("post_rounds")
+  photo  String  @default("")
 }
 
 model GolfCourse {
@@ -53,17 +61,6 @@ model GolfHole {
 
   @@unique([courseId, hole_number])
   @@index([courseId])
-}
-
-model Hits {
-  id         String @id @default(cuid())
-  stroke     Int
-  latitude   Float
-  longtitude Float
-  roundId    String
-  round      Round  @relation("round_strokes", fields: [roundId], references: [round_id])
-
-  @@index([roundId])
 }
 
 model Following {

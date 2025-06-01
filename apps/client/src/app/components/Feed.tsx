@@ -36,7 +36,7 @@ const Feed = ({ route, navigation }: {route: any, navigation: any}) => {
   })
 
   useEffect(() => {
-    if (explorePosts) {
+    /*if (explorePosts) {
       setLoadedPosts(prev => {
 
         const reshapedExplorePosts = explorePosts.map((post) => {
@@ -63,7 +63,7 @@ const Feed = ({ route, navigation }: {route: any, navigation: any}) => {
   
         return [...prev, ...filteredNewPosts];
       });
-    }   
+    }   */
   }, [explorePosts])
 
   useEffect(() => {
