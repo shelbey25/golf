@@ -165,11 +165,14 @@ const Hit = ({ }) => {
                 return currentHole === hole.hole_number
             })[0].hole_id : ""
 
+            const active_post = await AsyncStorage.getItem('active_post');
+
             await createRound.mutateAsync({
                 round_name: currentRoundInfo.split(",")[0],
                 hit_data: session_strokes ? session_strokes : "",
                 golfer_id: my_id,
                 hole_id: holeId,
+                post_id: active_post || ""
             })
             const all_sessions = await AsyncStorage.getItem('all_sessions');
             if (all_sessions !== null) {
@@ -219,6 +222,7 @@ const Hit = ({ }) => {
         AsyncStorage.setItem('active_session', 'false');
         const currentHole = parseInt(currentRoundInfo.split(",")[2].split(" ")[1])
         void (async () => {
+            const active_post = await AsyncStorage.getItem('active_post');
             const session_strokes = await AsyncStorage.getItem('session_strokes');
             const holeId = currentCourse ? currentCourse.holes.filter((hole) => {
                 return currentHole === hole.hole_number
@@ -228,6 +232,7 @@ const Hit = ({ }) => {
                 hit_data: session_strokes ? session_strokes : "",
                 golfer_id: my_id,
                 hole_id: holeId,
+                post_id: active_post || "",
             })
             setMostRecentRoundID(round_info.round_id)
             //need to make hole_id dynamic
@@ -271,6 +276,7 @@ const Hit = ({ }) => {
         <><CourseSelector onSelect={(course: any, par: any) => {
             setCurrentRoundInfo("Session " + sessionCount.toString() + "," + course.split(", ")[0] + "," + course.split(", ")[1] + "," + par)
           }}
+          my_id={my_id}
           setActiveSession={setActiveSession} setSessionStrokes={setSessionStrokes} setStrokeCount={setStrokeCount} currentRoundInfo={currentRoundInfo}
           />
        </>

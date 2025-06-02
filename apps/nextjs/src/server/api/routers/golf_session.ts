@@ -7,6 +7,7 @@ import {
   publicProcedure,
 } from "../trpc";
 import { PrismaClient } from '@prisma/client';
+import { connect } from "http2";
 
 
 export const golfSessionRouter = createTRPCRouter({
@@ -22,10 +23,11 @@ export const golfSessionRouter = createTRPCRouter({
       hit_data: z.string(),
       golfer_id: z.string(),
       hole_id: z.string(),
+      post_id: z.string()
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const {round_name, hit_data, golfer_id, hole_id} = input
+    const {round_name, hit_data, golfer_id, hole_id, post_id} = input
     return await ctx.prisma.round.create({
       data: {
         round_name: round_name,
@@ -40,6 +42,11 @@ export const golfSessionRouter = createTRPCRouter({
             hole_id: hole_id, 
           },
         },
+        postGroup: {
+          connect: {
+            id: post_id
+          }
+        }
       },
     });
   }),

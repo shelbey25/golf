@@ -16,6 +16,7 @@ model Golfer {
   password       String?  @default(uuid()) //make required later
   following      Golfer[] @relation("Following")
   followers      Golfer[] @relation("Following")
+  posts          Post[]   @relation("post_user")
   rounds         Round[]  @relation("golf_round")
   profilePhotoID String   @default("")
 }
@@ -39,9 +40,13 @@ model Round {
 }
 
 model Post {
-  id     String  @id @default(cuid())
-  rounds Round[] @relation("post_rounds")
-  photo  String  @default("")
+  id       String  @id @default(cuid())
+  rounds   Round[] @relation("post_rounds")
+  user     Golfer  @relation("post_user", fields: [golferId], references: [id])
+  golferId String
+  photo    String  @default("")
+
+  @@index([golferId])
 }
 
 model GolfCourse {

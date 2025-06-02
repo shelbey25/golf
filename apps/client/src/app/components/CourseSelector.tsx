@@ -4,9 +4,10 @@ import { api } from "../../utils/api";
 import tw from "../../utils/tailwind";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoadingScreen from "./Loading";
 
 
-const CourseSelector = ({ onSelect, setActiveSession, setSessionStrokes, setStrokeCount, currentRoundInfo }: { onSelect: Function, setActiveSession: Function, setSessionStrokes: Function, setStrokeCount: Function, currentRoundInfo: any }) => {
+const CourseSelector = ({ onSelect, setActiveSession, setSessionStrokes, setStrokeCount, currentRoundInfo, my_id }: { onSelect: Function, setActiveSession: Function, setSessionStrokes: Function, setStrokeCount: Function, currentRoundInfo: any, my_id: string }) => {
     const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState("");
   const { data: results } = api.courses.search.useQuery({ query });
@@ -22,6 +23,14 @@ const CourseSelector = ({ onSelect, setActiveSession, setSessionStrokes, setStro
       setIsReady(false)
     }
   }, [results, query])
+
+  const [isLoading, setIsLoading] = useState(false)
+
+  const startPost = api.golf_rounds.startNewPost.useMutation()
+
+  if (isLoading) {
+    return <LoadingScreen />
+  }
 
 
   return (
@@ -81,14 +90,22 @@ const CourseSelector = ({ onSelect, setActiveSession, setSessionStrokes, setStro
         style={tw`w-full py-5 rounded-xl ${isReady ? "bg-green-600" : "bg-stone-600"} shadow-lg flex items-center justify-center`}
             disabled={!isReady}
         onPress={() => {
-          setActiveSession("true");
-          AsyncStorage.setItem('active_session', 'true');
-          AsyncStorage.setItem('stroke_count', '0');
-          AsyncStorage.setItem('session_strokes', '');
-          AsyncStorage.setItem('current_round_info', currentRoundInfo);
+          void (async () => {
+            setIsLoading(true)
+            setActiveSession("true");
+            const response = await startPost.mutateAsync({
+              user_id: my_id,
+            })
+          await AsyncStorage.setItem('active_post', response.id);
+          await AsyncStorage.setItem('active_session', 'true');
+          await AsyncStorage.setItem('stroke_count', '0');
+          await AsyncStorage.setItem('session_strokes', '');
+          await AsyncStorage.setItem('current_round_info', currentRoundInfo);
           
           setSessionStrokes("");
           setStrokeCount("0")
+          setIsLoading(false)
+          })()
       }}
       >
         <Text style={tw`text-white font-bold text-lg`}>Start New Session</Text>

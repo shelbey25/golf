@@ -37,4 +37,22 @@ getAllPosts: publicProcedure.input(
     })
 
   }),
+  startNewPost: publicProcedure.input(
+    z.object({
+      user_id: z.string(),
+    })
+  ).mutation(async ({ ctx, input }) => {
+    const {user_id } = input
+    const post =  await ctx.prisma.post.create({
+        data: {
+            user: {
+                connect: {
+                    id: user_id
+                }
+            }
+        }
+    });
+    return {id: post.id}
+
+  }),
 })
