@@ -84,6 +84,8 @@ const Profile = ({ route, navigation }: {route: any, navigation: any}) => {
   }, []);
 
 
+
+
   const [allSessionInfo, set_AllSessionInfo] = useState<Session[]>([])
 
   function pairCoords(flatCoords: number[]): number[][] {

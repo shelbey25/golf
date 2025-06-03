@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Image,
@@ -32,12 +32,18 @@ const Feed = ({ route, navigation }: {route: any, navigation: any}) => {
 
     const [user_id, set_user_id] = useState("")
     const [lastPostId, setLastPostId] = useState("")
+    const [lastPostIdAlt, setLastPostIdAlt] = useState("")
 
   const [loadedPosts, setLoadedPosts] = useState<any[]>([])
 
   const {data: explorePosts, refetch: refetchPosts} = api.golf_rounds.getAllPosts.useQuery({
     user_id: user_id,
     lastPostId: lastPostId
+  })
+
+  const {data: followingPosts, refetch: refetchFollowingPosts} = api.golf_rounds.getFollowingPosts.useQuery({
+    user_id: user_id,
+    lastPostId: lastPostIdAlt
   })
 
     const { urls, loading, error, getPresignedUrl, clearUrls } = useMultipleS3PresignedUrl();
@@ -109,6 +115,34 @@ function pairCoords(flatCoords: number[]): number[][] {
      }
   }, [explorePosts])
 
+  const [loadedFollowingPosts, setLoadedFollowingPosts] = useState<any[]>([])
+
+  useEffect(() => {
+    if (followingPosts) {
+     const reshapedFollowingPosts = followingPosts.map((post) => {
+       return {
+         date: post.date,
+         photo: post.photo,
+         holes: post.rounds.map((round) => 
+           ({
+             hits: pairCoords(round.hit_data.split(",").filter((s: string) => s !== "" && s !== null).map((s: string) => Number(s)))
+           })
+         ),
+         id: post.id,
+         photo_key: post.user.profilePhotoID,
+         user_name: post.user.name,
+         user_id: post.user.id,
+         course_name: post.rounds[0].hole.course.name,
+         top_hole: post.rounds.reduce((max, round) => {
+           return round.hole.hole_number > max.hole_number ? round : max;
+         }, post.rounds[0]).hole.hole_number
+       }
+     })
+     //console.log(reshapedExplorePosts)
+     setLoadedFollowingPosts(reshapedFollowingPosts)
+    }
+ }, [followingPosts])
+
   useEffect(() => {
     (async () => {
         const basic_info = await AsyncStorage.getItem('my_basic_info');
@@ -133,6 +167,7 @@ function pairCoords(flatCoords: number[]): number[][] {
     );
     setActiveIndices(prev => ({ ...prev, [outerIndex]: innerIndex }));
   };
+
 
   
 
@@ -166,10 +201,9 @@ function pairCoords(flatCoords: number[]): number[][] {
           </View>
 
         </View>
-        {loadedPosts && loadedPosts.length > 0 && !isLoading ? <FlatList
-        data={loadedPosts}
+        {loadedFollowingPosts && loadedFollowingPosts.length > 0 && loadedPosts && loadedPosts.length > 0 && !isLoading ? <FlatList
+        data={activeScroll === "friends" ? loadedFollowingPosts : loadedPosts}
         showsVerticalScrollIndicator={false}
-
         keyExtractor={(item, index) => index.toString()}
         style={tw` flex w-full`}
         renderItem={({ item, index: outerIndex }) => (

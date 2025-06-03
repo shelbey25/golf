@@ -79,6 +79,7 @@ const SessionMediaUpload = ({ onComplete, onSkip, round_id }: {onComplete: Funct
   };
 
 const updateFlic = api.golf_rounds.updateFlic.useMutation()
+const postFinished = api.golf_rounds.finishPost.useMutation()
 
   const uploadMedia = async () => {
     if (!selectedImage || !file) return;
@@ -137,7 +138,18 @@ const updateFlic = api.golf_rounds.updateFlic.useMutation()
       <View style={tw`flex-row justify-between mt-2 `}>
         <TouchableOpacity 
           onPress={() => {
+            void (async () => {
+              setIsUploading(true);
+            try {
+              const active_post = await AsyncStorage.getItem('active_post');
+              await postFinished.mutateAsync({
+                post_id: active_post || ""
+              })
+            } finally {
+              setIsUploading(false);
+            }
             onSkip()
+          })()
         }}
           style={tw`bg-stone-300 rounded-xl px-6 py-4 flex-1 mr-2 items-center`}
         >
