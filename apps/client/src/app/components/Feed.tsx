@@ -22,6 +22,7 @@ import { GestureHandlerRootView, ScrollView } from "react-native-gesture-handler
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import useMultipleS3PresignedUrl from "../hooks/useMultipleS3PresignedUrl";
 import MapView, { Marker, Polyline } from "react-native-maps";
+import LoadingScreen from "./Loading";
 
 const Feed = ({ route, navigation }: {route: any, navigation: any}) => {
   
@@ -165,7 +166,7 @@ function pairCoords(flatCoords: number[]): number[][] {
           </View>
 
         </View>
-        {loadedPosts && !isLoading ? <FlatList
+        {loadedPosts && loadedPosts.length > 0 && !isLoading ? <FlatList
         data={loadedPosts}
         showsVerticalScrollIndicator={false}
 
@@ -271,7 +272,7 @@ function pairCoords(flatCoords: number[]): number[][] {
           </View>
         }
         
-      /> : null}
+      /> : <LoadingScreen/>}
 
       </View>
     </GestureHandlerRootView>

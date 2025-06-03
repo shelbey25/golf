@@ -118,14 +118,17 @@ useEffect(() => {
     <View style={tw`flex-row justify-between`}>
       {displayNext ? <TouchableOpacity 
         onPress={() => {onNextHole()}}
-        style={tw`bg-green-600 rounded-xl p-4 flex-1 mr-2 items-center justify-center shadow-md`}
+        disabled={strokeCount == "0"}
+        style={tw`${strokeCount == "0" ? "bg-stone-600" : "bg-green-600"} rounded-xl p-4 flex-1 mr-2 items-center justify-center shadow-md`}
       >
         <Text style={tw`text-white font-bold`}>Next Hole</Text>
       </TouchableOpacity> : null}
       
       <TouchableOpacity 
         onPress={() => {onFinish()}}
-        style={tw`bg-red-500 rounded-xl p-4 flex-1 ${displayNext ? "ml-2" : ""} items-center justify-center shadow-md`}
+        disabled={strokeCount == "0"}
+        style={tw`${strokeCount == "0" ? "bg-stone-600" : "bg-red-500"}  rounded-xl p-4 flex-1 ${displayNext ? "ml-2" : ""} items-center justify-center shadow-md`}
+        
       >
         <Text style={tw`text-white font-bold`}>Finish Session</Text>
       </TouchableOpacity>

@@ -135,6 +135,7 @@ const Profile = ({ route, navigation }: {route: any, navigation: any}) => {
   const [eagles, setEagles] = useState(0);
   const [birdies, setBirdies] = useState(0);
   const [recentCourses, setRecentCourses] = useState<any[]>([]);
+  const [bestRound, setBestRound] = useState("")
 
   useEffect(() => {
     let totalStrokes = 0;
@@ -143,6 +144,7 @@ const Profile = ({ route, navigation }: {route: any, navigation: any}) => {
     let birdiesCount = 0;
 
 allSessionInfo.forEach((session) => {
+
   totalStrokes += session.hits.length;
   totalPar += parseInt(session.par);
   if (parseInt(session.par) - 1 === session.hits.length) {
@@ -152,8 +154,45 @@ allSessionInfo.forEach((session) => {
     birdiesCount += 1
   }
 });
-setAvgStrokes(allSessionInfo.length > 0 ? totalStrokes/allSessionInfo.length : 0)
-setAvgStrokesVSPar(allSessionInfo.length > 0 ? (totalStrokes-totalPar)/allSessionInfo.length : 0)
+
+const combinedSessions =  Object.values(
+  allSessionInfo.reduce((acc, session) => {
+    const hitCount = session.hits.length;
+    const parCount = parseInt(session.par);
+
+    if (!acc[session.name]) {
+      acc[session.name] = {
+        ...session,
+        totalHits: hitCount,
+        parCount: parCount,
+      };
+    } else {
+      acc[session.name].totalHits += hitCount;
+      acc[session.name].parCount += parCount;
+    }
+
+    return acc;
+  }, {} as Record<string, any>)
+);
+
+if (combinedSessions && combinedSessions.length > 0) {
+const bestSession = combinedSessions.reduce((min, session) => {
+  const diff = session.totalHits - session.parCount;
+  const minDiff = min.totalHits - min.parCount;
+  return diff < minDiff ? session : min;
+});
+
+  setBestRound(bestSession.totalHits.toString() + " (" +  (bestSession.totalHits-bestSession.parCount).toString() + ")")
+} else {
+  setBestRound("0 (0)")
+}
+
+
+
+setAvgStrokes(allSessionInfo.length > 0 ? totalStrokes/combinedSessions.length : 0)
+setAvgStrokesVSPar(allSessionInfo.length > 0 ? (totalStrokes-totalPar)/combinedSessions.length : 0)
+
+
 setEagles(eaglesCount)
 setBirdies(birdiesCount)
 
@@ -240,7 +279,14 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
           <View style={tw`flex flex-row justify-between flex-wrap gap-y-2`}>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Total Rounds</Text>
-              <Text style={tw`text-white text-lg font-bold`}>{allSessionInfo.length}</Text>
+              <Text style={tw`text-white text-lg font-bold`}>{Object.values(
+  allSessionInfo.reduce((acc, session) => {
+    if (!acc[session.name]) {
+      acc[session.name] = session;
+    }
+    return acc;
+  }, {} as Record<string, typeof allSessionInfo[0]>)
+).length}</Text>
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Avg Score</Text>
@@ -248,7 +294,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Best Round</Text>
-              <Text style={tw`text-white text-lg font-bold`}>FIX</Text>
+              <Text style={tw`text-white text-lg font-bold`}>{bestRound}</Text>
             </View>
             <View style={tw`w-[48%]`}>
               <Text style={tw`text-white text-sm`}>Longest Drive</Text>
