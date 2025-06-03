@@ -18,11 +18,23 @@ getAllPosts: publicProcedure.input(
     })
   ).query(async ({ ctx, input }) => {
     const {user_id, lastPostId} = input
-    return await ctx.prisma.round.findMany({
+    return await ctx.prisma.post.findMany({
         where: {
             golferId: {
               not: user_id, // Exclude the current user's ID
             },
+        },
+        include: {
+          rounds: {
+            include: {
+              hole: {
+                include: {
+                  course: {}
+                }
+              }
+            }
+          },
+          user: {}
         },
         take: 10,
         ...(lastPostId
@@ -55,4 +67,22 @@ getAllPosts: publicProcedure.input(
     return {id: post.id}
 
   }),
+  updateFlic: publicProcedure
+    .input(
+      z.object({
+        img_key: z.string(),
+        post_id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const {img_key, post_id} = input
+      return await ctx.prisma.post.update({
+        where: {
+          id: post_id,
+        },
+        data: {
+          photo: img_key,
+        },
+      });
+    }),
 })

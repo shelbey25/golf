@@ -96,7 +96,6 @@ const Sessions = ({ }: {}) => {
     setGroupedInfo(grouped)
   }, [allSessionInfo])
 
-  console.log(groupedInfo[0].sessions[0])
 const [activeIndices, setActiveIndices] = useState<{ [key: number]: number }>({});
 const handleInnerScroll = (outerIndex: number, e: NativeSyntheticEvent<NativeScrollEvent>) => {
   const innerIndex = Math.round(
@@ -105,6 +104,9 @@ const handleInnerScroll = (outerIndex: number, e: NativeSyntheticEvent<NativeScr
   setActiveIndices(prev => ({ ...prev, [outerIndex]: innerIndex }));
 };
 
+/*if (groupedInfo[0]) {
+console.log(groupedInfo[0].sessions)
+}*/
   return (
     <View style={tw`h-full flex flex-col justify-between  bg-stone-800 `}>
       <FlatList

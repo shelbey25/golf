@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import tw from 'twrnc';
 import LoadingScreen from './Loading';
 import { api } from '../../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 type File = {
     uri: string;
     name: string;
@@ -77,8 +78,7 @@ const SessionMediaUpload = ({ onComplete, onSkip, round_id }: {onComplete: Funct
       }
   };
 
-const updateFlic = api.golf_session.addImg.useMutation()
-
+const updateFlic = api.golf_rounds.updateFlic.useMutation()
 
   const uploadMedia = async () => {
     if (!selectedImage || !file) return;
@@ -86,9 +86,10 @@ const updateFlic = api.golf_session.addImg.useMutation()
     setIsUploading(true);
     try {
       const image_key = await uploadToS3(file);
+      const active_post = await AsyncStorage.getItem('active_post');
       await updateFlic.mutateAsync({
         img_key: image_key,
-        round_id: round_id
+        post_id: active_post || ""
       })
       onComplete();
     } finally {

@@ -40,11 +40,12 @@ model Round {
 }
 
 model Post {
-  id       String  @id @default(cuid())
-  rounds   Round[] @relation("post_rounds")
-  user     Golfer  @relation("post_user", fields: [golferId], references: [id])
+  id       String   @id @default(cuid())
+  rounds   Round[]  @relation("post_rounds")
+  user     Golfer   @relation("post_user", fields: [golferId], references: [id])
   golferId String
-  photo    String  @default("")
+  photo    String   @default("")
+  date     DateTime @default(now())
 
   @@index([golferId])
 }
