@@ -102,7 +102,7 @@ const Hit = ({ }) => {
                 await AsyncStorage.setItem('current_round_info', "");
                 setCurrentRoundInfo("")
             } else {
-                console.log(roundInfo)
+                //console.log(roundInfo)
                 setCurrentRoundInfo(roundInfo)
             }
         })()

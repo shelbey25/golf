@@ -104,7 +104,7 @@ function pairCoords(flatCoords: number[]): number[][] {
           }, post.rounds[0]).hole.hole_number
         }
       })
-      console.log(reshapedExplorePosts)
+      //console.log(reshapedExplorePosts)
       setLoadedPosts(reshapedExplorePosts)
      }
   }, [explorePosts])
@@ -189,14 +189,14 @@ function pairCoords(flatCoords: number[]): number[][] {
             
             <FlatList
                         style={tw`w-90`}
-              data={[{isImage: true}, ...item.holes]}
+              data={urls[item.id] ? [{isImage: true}, ...item.holes] : item.holes}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
               keyExtractor={(_, innerIndex) => innerIndex.toString()}
               onScroll={e => handleInnerScroll(outerIndex, e)}
               renderItem={({ item: smItem, index: innerIndex }) => {
-                if (innerIndex === 0) { // First item is the image
+                if (urls[item.id] && innerIndex === 0) { // First item is the image
                   return (
                     <View style={tw`w-90 aspect-square rounded-md bg-gray-200 justify-center items-center`}>
                      <Image
@@ -246,7 +246,16 @@ function pairCoords(flatCoords: number[]): number[][] {
 
                      <View style={tw`flex-row justify-center absolute bottom-7 w-full items-center right-4`}>  
                         <View style={tw`flex-row justify-center bg-stone-600 p-2 rounded-lg opacity-100`}>
-        {(new Array(item.holes.length + 1).fill("Nish")).map((_, i) => (
+        {urls[item.id] ? (new Array(item.holes.length + 1).fill("Nish")).map((_, i) => (
+          <View
+            key={i}
+            style={tw`h-2 w-2 rounded-full mx-1 ${
+              (activeIndices[outerIndex] ?? 0) === i
+                ? 'bg-blue-500'
+                : 'bg-gray-300'
+            }`}
+          />
+        )) : (new Array(item.holes.length).fill("Nish")).map((_, i) => (
           <View
             key={i}
             style={tw`h-2 w-2 rounded-full mx-1 ${

@@ -116,8 +116,8 @@ console.log(groupedInfo[0].sessions)
         <>{item ?
         <View style={tw`p-4 justify-center items-center`}>
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>{item.name}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].course}, {item.sessions[0].hole} {"(Par " + item.sessions[0].par + ")"}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].hits.length} Strokes</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].course}{/*}, {item.sessions[0].hole} {"(Par " + item.sessions[0].par + ")"}*/}</Text>
+            {/*<Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].hits.length} Strokes</Text>*/}
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].date.toDateString()}</Text>
             <View style={tw`h-[4]`}></View>
             
@@ -182,51 +182,7 @@ console.log(groupedInfo[0].sessions)
       )}
       
     />
-      {/*<FlatList
-      data={allSessionInfo}
-      renderItem={({ item }) => (
-        <>{item ?
-        <View style={tw`p-4 justify-center items-center`}>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>{item.name}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.course}, {item.hole} {"(Par " + item.par + ")"}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.hits.length} Strokes</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.date.toDateString()}</Text>
-            <View style={tw`h-[4]`}></View>
-            <MapView
-                mapType="satellite"
-                style={tw`w-full aspect-3/2 rounded-md`}
-                initialRegion={{
-                latitude: (item.hits[0][0]+item.hits[item.hits.length-1][0])/2, // Replace with the latitude of your golf course
-                longitude: (item.hits[0][1]+item.hits[item.hits.length-1][1])/2, // Replace with the longitude of your golf course
-                latitudeDelta: Math.abs(item.hits[0][0]-item.hits[item.hits.length-1][0])*1.2 > 0.001 ? Math.abs(item.hits[0][0]-item.hits[item.hits.length-1][0])*1.2 : 0.001,
-                longitudeDelta: Math.abs(item.hits[0][1]-item.hits[item.hits.length-1][1])*1.2 > 0.001 ?  Math.abs(item.hits[0][1]-item.hits[item.hits.length-1][1])*1.2 : 0.001,
-                }}
-                scrollEnabled={false}   
-                zoomEnabled={false}      
-                pitchEnabled={false}   
-                rotateEnabled={false}    
-                showsUserLocation={false}
-            >
-                {item.hits.map((hit, index) => (
-                    <Marker key={index} coordinate={{ latitude: hit[0], longitude: hit[1] }}>
-                        <View style={tw`h-2 w-2 ${index == 0 ? "bg-red-500" : index == item.hits.length-1 ? "bg-green-500" : "bg-slate-900"} rounded-full`}></View>
-                    </Marker>
-                ))
-                }
-                <Polyline
-                    coordinates={item.hits.map(hit => ({
-                    latitude: hit[0],
-                    longitude: hit[1],
-                    }))}
-                    strokeColor="#FFFFFF" // red line
-                    strokeWidth={3}
-                />
-            </MapView>
-        </View>
-        : null}</>
-      )}
-      keyExtractor={item => item.name + " " + item.holeId}
-    />*/}
+     
     </View>
   );
 };

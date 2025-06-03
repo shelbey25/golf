@@ -100,10 +100,10 @@ const GolfClub = ({ }: {}) => {
   }, [hole_scores, club_data])
 
   useEffect(() => {
-    console.log(club_data)
+    /*console.log(club_data)
     console.log(leaders)
     console.log("HOLE: ")
-    console.log(hole_scores)
+    console.log(hole_scores)*/
 
   }, [leaders, hole_scores, club_data])
 
@@ -158,11 +158,11 @@ const GolfClub = ({ }: {}) => {
                     <Text style={{ fontFamily: '', fontSize: 30 }}>
                     {index+1 + ". " + item.name}
                     </Text>
-                    <Image
+                    {/*<Image
                       source={require("../../../assets/HS.07.19.23.SH.SHC2341.jpeg")}
                       style={tw`w-10 h-10 rounded-full aspect-square`}
                       resizeMode="cover"
-                    />
+                    />*/}
                   </View>
                   <Text style={{ fontFamily: '', fontSize: 30 }}>
                     {item.strokes}

@@ -3,6 +3,8 @@ import {
     FlatList,
   Image,
   ImageBackground,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   Text,
   TouchableOpacity,
@@ -17,6 +19,7 @@ import { useAppState } from "./RouteWrap";
 import * as FileSystem from 'expo-file-system';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import LoadingScreen from "./Loading";
 
 export type Session = {
   name: string;
@@ -35,28 +38,62 @@ const SessionPreview = ({ }: {}) => {
 
   const { mode, setMode, allSessionInfoGlobal } = useAppState();
 
- 
+  const [activeIndices, setActiveIndices] = useState<{ [key: number]: number }>({});
+  const handleInnerScroll = (outerIndex: number, e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const innerIndex = Math.round(
+      e.nativeEvent.contentOffset.x / e.nativeEvent.layoutMeasurement.width
+    );
+    setActiveIndices(prev => ({ ...prev, [outerIndex]: innerIndex }));
+  };
 
+  const [reformattedGlobal, setReformattedGlobal] = useState<any[]>([])
+
+  useEffect(() => {
+    setReformattedGlobal(allSessionInfoGlobal.map((session) => ({
+      course: session.course,
+      date: session.date,
+      hits: session.hits,
+      hole: session.hole,
+      holeId: session.holeId,
+      name: session.name,
+      par: session.par,
+    })))
+  }, [allSessionInfoGlobal])
+
+  console.log(allSessionInfoGlobal)
+//return null
   return (
     <View style={tw`h-full flex flex-col justify-between  bg-stone-800 `}>
-      <FlatList
-      data={allSessionInfoGlobal}
-      renderItem={({ item }) => (
+      {reformattedGlobal.length > 0 ? <FlatList
+      data={reformattedGlobal}
+      keyExtractor={(_, outerIndex) => outerIndex.toString()}
+      renderItem={({ item, index: outerIndex }) => (
         <>{item ?
         <View style={tw`p-4 justify-center items-center`}>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>{item.name}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.course}, {item.hole} {"(Par " + item.par + ")"}</Text>
-            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.hits.length} Strokes</Text>
+<Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 25, color: "white" }}>{item.name}</Text>
+            <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.course}{/*}, {item.sessions[0].hole} {"(Par " + item.sessions[0].par + ")"}*/}</Text>
+            {/*<Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.sessions[0].hits.length} Strokes</Text>*/}
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 16, color: "white" }}>{item.date.toDateString()}</Text>
-            <View style={tw`h-[4]`}></View>
-            <MapView
+        <View style={tw`h-[4]`}></View>
+            
+            
+            <FlatList
+            style={tw`w-80`}
+  data={item.sessions}
+  horizontal
+  pagingEnabled
+  showsHorizontalScrollIndicator={false}
+  keyExtractor={(_, innerIndex) => innerIndex.toString()}
+  onScroll={e => handleInnerScroll(outerIndex, e)}
+  renderItem={({ item: smItem }) => (
+  <MapView
                 mapType="satellite"
-                style={tw`w-full aspect-3/2 rounded-md`}
+                style={tw`w-80 aspect-square rounded-md`}
                 initialRegion={{
-                latitude: (item.hits[0][0]+item.hits[item.hits.length-1][0])/2, // Replace with the latitude of your golf course
-                longitude: (item.hits[0][1]+item.hits[item.hits.length-1][1])/2, // Replace with the longitude of your golf course
-                latitudeDelta: Math.abs(item.hits[0][0]-item.hits[item.hits.length-1][0])*1.2 > 0.001 ? Math.abs(item.hits[0][0]-item.hits[item.hits.length-1][0])*1.2 : 0.001,
-                longitudeDelta: Math.abs(item.hits[0][1]-item.hits[item.hits.length-1][1])*1.2 > 0.001 ?  Math.abs(item.hits[0][1]-item.hits[item.hits.length-1][1])*1.2 : 0.001,
+                latitude: (smItem.hits[0][0]+smItem.hits[smItem.hits.length-1][0])/2, // Replace with the latitude of your golf course
+                longitude: (smItem.hits[0][1]+smItem.hits[smItem.hits.length-1][1])/2, // Replace with the longitude of your golf course
+                latitudeDelta: Math.abs(smItem.hits[0][0]-smItem.hits[smItem.hits.length-1][0])*1.2 > 0.001 ? Math.abs(smItem.hits[0][0]-smItem.hits[smItem.hits.length-1][0])*1.2 : 0.001,
+                longitudeDelta: Math.abs(smItem.hits[0][1]-smItem.hits[smItem.hits.length-1][1])*1.2 > 0.001 ?  Math.abs(smItem.hits[0][1]-smItem.hits[smItem.hits.length-1][1])*1.2 : 0.001,
                 }}
                 scrollEnabled={false}   
                 zoomEnabled={false}      
@@ -64,26 +101,42 @@ const SessionPreview = ({ }: {}) => {
                 rotateEnabled={false}    
                 showsUserLocation={false}
             >
-                {item.hits.map((hit, index) => (
+                {smItem.hits.map((hit: any, index: number) => (
                     <Marker key={index} coordinate={{ latitude: hit[0], longitude: hit[1] }}>
-                        <View style={tw`h-2 w-2 opacity-100 ${index == 0 ? "bg-red-500" : index == item.hits.length-1 ? "bg-green-500" : "bg-slate-900"} rounded-full`}></View>
+                        <View style={tw`h-2 w-2 ${index == 0 ? "bg-red-500" : index == smItem.hits.length-1 ? "bg-green-500" : "bg-slate-900"} rounded-full`}></View>
                     </Marker>
                 ))
                 }
                 <Polyline
-                    coordinates={item.hits.map(hit => ({
+                    coordinates={smItem.hits.map((hit: any) => ({
                     latitude: hit[0],
                     longitude: hit[1],
                     }))}
                     strokeColor="#FFFFFF" // red line
                     strokeWidth={3}
                 />
-            </MapView>
+            </MapView>)} />
+
+
+            <View style={tw`flex-row justify-center absolute bottom-7 bg-stone-600 p-2 rounded-lg opacity-100`}>
+        {item.sessions.map((_: any, i: number) => (
+          <View
+            key={i}
+            style={tw`h-2 w-2 rounded-full mx-1 ${
+              (activeIndices[outerIndex] ?? 0) === i
+                ? 'bg-blue-500'
+                : 'bg-gray-300'
+            }`}
+          />
+        ))}
+      </View>
+
+
         </View>
         : null}</>
       )}
-      keyExtractor={item => item.name + " " + item.holeId}
-    />
+      
+    /> : <LoadingScreen />}
     </View>
   );
 };

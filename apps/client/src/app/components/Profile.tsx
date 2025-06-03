@@ -189,8 +189,8 @@ const bestSession = combinedSessions.reduce((min, session) => {
 
 
 
-setAvgStrokes(allSessionInfo.length > 0 ? totalStrokes/combinedSessions.length : 0)
-setAvgStrokesVSPar(allSessionInfo.length > 0 ? (totalStrokes-totalPar)/combinedSessions.length : 0)
+setAvgStrokes(combinedSessions.length > 0 ? totalStrokes/combinedSessions.length : 0)
+setAvgStrokesVSPar(combinedSessions.length > 0 ? (totalStrokes-totalPar)/combinedSessions.length : 0)
 
 
 setEagles(eaglesCount)
@@ -214,7 +214,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
       setIsLoading(true)
       if (!myInfo) return;
 
-      console.log(myInfo)
+      //console.log(myInfo)
   
   
       //Fix so maybe it is linked to the user id
