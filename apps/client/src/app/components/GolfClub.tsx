@@ -18,6 +18,7 @@ import { useAppState } from "./RouteWrap";
 import * as FileSystem from 'expo-file-system';
 import MapView, { Marker, Polyline } from 'react-native-maps';
 import { ScrollView } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 //Need to make hole 1 auto load
 
@@ -35,9 +36,20 @@ const GolfClub = ({ }: {}) => {
   const [activeHole, setActiveHole] = useState(1);
   const [intializer, setInitializer] = useState(false);
   const [holeId, setHoleId] = useState("")
-  const [leaders, setLeaders] = useState<Rank[]>([])
+  const [leaders, setLeaders] = useState<Rank[]>([]);
 
-  const {data: hole_scores, refetch: refetchCompetitors, isLoading: ranks_loading} = api.golf_user.getAllCompetitors.useQuery({my_id: "cmamev4250000k41rp3vmpd4x", hole_id: holeId});
+  const [user_id, set_user_id] = useState("")
+  useEffect(() => {
+    (async () => {
+        const basic_info = await AsyncStorage.getItem('my_basic_info');
+        if (basic_info) {
+          set_user_id(basic_info.split("\\")[0])
+        }
+      
+    })();
+  }, []);
+
+  const {data: hole_scores, refetch: refetchCompetitors, isLoading: ranks_loading} = api.golf_user.getAllCompetitors.useQuery({my_id: user_id, hole_id: holeId});
   const {data: club_data} = api.courses.getSpecificCourse.useQuery({name: club },
     {onSuccess: (data) => {
       setInitializer(true)
@@ -87,11 +99,13 @@ const GolfClub = ({ }: {}) => {
 
   }, [hole_scores, club_data])
 
-  /*useEffect(() => {
+  useEffect(() => {
     console.log(club_data)
-    console.log(club)
+    console.log(leaders)
+    console.log("HOLE: ")
+    console.log(hole_scores)
 
-  }, [club_data])*/
+  }, [leaders, hole_scores, club_data])
 
   return (
     <View style={tw`h-full flex flex-col justify-start  bg-stone-800 `}>
