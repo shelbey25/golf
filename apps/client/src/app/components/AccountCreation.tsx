@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import tw from "twrnc";
 import { api } from "../../utils/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,7 +17,21 @@ export default function CreateAccount() {
       await AsyncStorage.setItem('my_basic_info', result);
       setMode("Add PFP")
       setIsUploading(false)
+    },
+    onError: (error) => {
+      if (
+        error.data?.code === 'INTERNAL_SERVER_ERROR' &&
+        error.message.includes('Unique constraint failed')
+      ) {
+        // Show specific message to user
+        Alert.alert("Account Creation Failed", "Email or name is already in use.");
+      } else {
+        Alert.alert("Error", "Something went wrong. Please try again.");
+      }
+  
+      setIsUploading(false);
     }
+    
   })
 
   const handleCreateAccount = async () => {

@@ -8,6 +8,7 @@ import {
 } from "../trpc";
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { TRPCError } from "@trpc/server";
 
 
 export const golfUserRouter = createTRPCRouter({
@@ -25,6 +26,7 @@ export const golfUserRouter = createTRPCRouter({
   ).mutation(async ({ ctx, input }) => {
     const {name, email, password} = input
     const hash = await bcrypt.hash(password, 10) as string;
+    try {
     const newUser = await ctx.prisma.golfer.create({
       data: {
         name: name,
@@ -34,6 +36,19 @@ export const golfUserRouter = createTRPCRouter({
     })
 
     return newUser.id + "\\" + newUser.name;
+  } catch (err: any) {
+    if (err.code === 'P2002') {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'Email or name is already taken',
+      });
+    }
+  
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Could not create user.',
+    });
+  }
   }),
   verifyUser: publicProcedure.input(
     z.object({

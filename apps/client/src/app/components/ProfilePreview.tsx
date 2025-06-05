@@ -194,7 +194,7 @@ setRecentCourses(Array.from(new Set(allSessionInfo.sort(
               style={tw`w-14 h-14 rounded-full mr-4`}
             />
             <Text style={{ fontFamily: 'PlayfairDisplay_400Regular', fontSize: 22, color: "white" }}>
-              My Golf Stats
+            {myInfo?.name.split(" ")[0] ? myInfo?.name.split(" ")[0] + "\'s" : ""} Golf Stats
             </Text>
           </View>
 

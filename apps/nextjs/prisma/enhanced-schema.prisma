@@ -1,0 +1,101 @@
+# Enhanced schema.prisma with Like model
+
+```prisma
+generator client {
+ provider = "prisma-client-js"
+ previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+ provider = "postgresql"
+ url = env("DATABASE_URL")
+ relationMode = "prisma"
+}
+
+model Golfer {
+ id String @id @default(cuid())
+ name String @unique @default("")
+ email String @unique @default("")
+ password String? @default(uuid()) //make required later
+ following Golfer[] @relation("Following")
+ followers Golfer[] @relation("Following")
+ posts Post[] @relation("post_user")
+ rounds Round[] @relation("golf_round")
+ profilePhotoID String @default("")
+ likes Like[] @relation("user_likes")
+}
+
+model Round {
+ round_id String @id @default(cuid())
+ round_name String @default("")
+ golferId String
+ holeId String
+ hit_data String @default("")
+ date DateTime @default(now())
+ golfer Golfer @relation("golf_round", fields: [golferId], references: [id])
+ hole GolfHole @relation("round_holes", fields: [holeId], references: [hole_id])
+ attachedPhotoID String @default("")
+ postGroup Post @relation("post_rounds", fields: [postId], references: [id])
+ postId String
+
+ @@index([postId])
+ @@index([golferId])
+ @@index([holeId])
+}
+
+model Post {
+ id String @id @default(cuid())
+ rounds Round[] @relation("post_rounds")
+ user Golfer @relation("post_user", fields: [golferId], references: [id])
+ golferId String
+ photo String @default("")
+ date DateTime @default(now())
+ fullyFinished Boolean @default(false)
+ likes Like[] @relation("post_likes")
+
+ @@index([golferId])
+ @@index([date])
+}
+
+model Like {
+ id String @id @default(cuid())
+ userId String
+ postId String
+ createdAt DateTime @default(now())
+ 
+ user Golfer @relation("user_likes", fields: [userId], references: [id], onDelete: Cascade)
+ post Post @relation("post_likes", fields: [postId], references: [id], onDelete: Cascade)
+ 
+ @@unique([userId, postId])
+ @@index([postId])
+ @@index([userId])
+}
+
+model GolfCourse {
+ course_id String @id @default(cuid())
+ name String @unique @default("")
+ holes GolfHole[] @relation("course_holes")
+ location String @default("")
+}
+
+model GolfHole {
+ hole_id String @id @default(cuid())
+ hole_number Int
+ courseId String
+ par Int @default(0)
+ course GolfCourse @relation("course_holes", fields: [courseId], references: [course_id])
+ rounds Round[] @relation("round_holes")
+
+ @@unique([courseId, hole_number])
+ @@index([courseId])
+}
+
+model Following {
+ A String
+ B String
+
+ @@unique([A, B], map: "_Following_AB_unique")
+ @@index([B], map: "_Following_B_index")
+ @@map("_Following")
+}
+```
